@@ -94,5 +94,7 @@ chrono.seconds = 62; //3h51min2sec (=3h50min62sec)
 Chrono.js will compute elapsed time (seconds, minutes, hours) only on access. This optimization is only available on ECMA5 compliant env (use of Object.defineProperty). You may want to use a polyfill to enjoy this feature.
 
 # TODO (if needed)
-* Add special ticks handling (after `x` ticks, every `x` ticks)
+* Add a demo
+* Make a custom page including this demo
 * Include Object.defineProperty polyfill / shim
+* Add special ticks handling (after `x` ticks, every `x` ticks)
