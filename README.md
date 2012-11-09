@@ -63,7 +63,7 @@ c = new Chrono(100, function(tick, chrono) { // tick every 100ms
   if (tick > 100) { // stop after 100 * 100 = 10.000ms = 10 secs
     chrono.stop();
   }
-}
+});
 ```
 
 ## Accessing and setting elapsed time numbers
@@ -72,7 +72,7 @@ You can access elapsed seconds (0-59), minutes (0-59) and hours (0+) by direcly 
 ``` javascript
 chrono = new Chrono(1000); // 1 tick = 1 second
 chrono.reset(3 * 3600 + 24 * 60 + 12); // set to 3h24min12sec
-console.log (chrono.hours + 'h' + chrono.minutes + 'min' + chrono.seconds + 'sec');
+console.log(chrono.hours + 'h' + chrono.minutes + 'min' + chrono.seconds + 'sec');
 >3h24min12sec
 ```
 
