@@ -29,7 +29,7 @@ You have to pass the precision (delay between ticks) and the handlers that will 
 ``` javascript
 c = new Chrono(100, function(ticks, chrono) { // tick every 100ms
   console.log("ticks " + ticks);
-}
+});
 ```
 
 ## Controls
