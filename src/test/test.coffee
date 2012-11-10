@@ -5,6 +5,6 @@ expect = chai.expect
 Chrono = require '../lib/chrono'
 
 describe 'Chrono', ->
-	describe 'Creation', ->
-		it 'should be exported properly', ->
-			expect(Chrono).to.exist
+  describe 'Creation', ->
+    it 'should be exported properly', ->
+      expect(Chrono).to.exist

@@ -7,11 +7,10 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     clean:{
-      build:"lib",
-      test:"test"
+      all:["lib","test"]
     },
     coffeelint:{
-      lib:["src/*.coffee"]
+      all:["src/*.coffee", "src/test/*.coffee"]
     },
     coffee:{
       compile:{
