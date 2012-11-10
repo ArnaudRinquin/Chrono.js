@@ -10,6 +10,9 @@ module.exports = function(grunt) {
       build:"lib",
       test:"test"
     },
+    coffeelint:{
+      lib:["src/*.coffee"]
+    },
     coffee:{
       compile:{
         files:{
@@ -36,5 +39,5 @@ module.exports = function(grunt) {
 
 
 
-  grunt.registerTask('default', 'clean coffee min simplemocha');
+  grunt.registerTask('default', 'clean coffeelint coffee min simplemocha');
 };
