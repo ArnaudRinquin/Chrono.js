@@ -8,17 +8,19 @@ class Chrono
 
   # Start the ticking, do nothing if already started
   start:->
-    return this if @handler #handler means it's already stared so do nothing
+    return this if @__handlers #handler means it's already stared so do nothing
     @__callHandlers() #call handlers @ start
     # make use of '=>' to ensure the scope
-    @handler = setInterval ((args)=>@__tick args), @precision
+    @__handlers = setInterval ((args)=>@__tick args), @precision
+    @ticking = true
     this
 
   # Stop will just stop ticking if already started
   # Don't use it as a toggle function, no effect if already paused
   stop:->
-    clearInterval @handler if @handler
-    @handler = null
+    clearInterval @__handlers if @__handlers
+    @__handlers = null
+    @ticking = false
     this
 
   # Reset will pause the time and set the time to 0 or given time (in seconds)

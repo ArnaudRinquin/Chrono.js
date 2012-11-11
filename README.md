@@ -1,6 +1,6 @@
 # Chrono.js
 
-A simple Javascript Chronometer implementation written in CoffeeScript.
+A simple Javascript Chronometer implementation written in CoffeeScript. It should be very useful when developing games or any timed application.
 
 # Features
 With Chrono.js you can:
@@ -17,6 +17,12 @@ Include `chrono.min.js` in your code, no surprise:
 ``` html
 <script src="chrono.min.js"></script>
 ```
+
+Within node.js, require it like this:
+
+```javascript
+Chrono = require('Chrono').Chrono
+``
 
 Chrono.js does not rely on any library.
 
@@ -52,6 +58,20 @@ chrono = new Chrono(100);
 chrono.start();
 // ... restart from 5 seconds
 chrono.reset(5000 / 100).start();
+```
+
+You can know the chrono's state from it's `ticking` attribute:
+
+```javascript
+chrono = new Chrono(100);
+chrono.ticking;
+>false
+chrono.start().ticking;
+>true
+chrono.stop().ticking;
+>false
+chrono.start().reset().ticking;
+>false
 ```
 
 ## Handling ticks
@@ -96,5 +116,6 @@ Chrono.js will compute elapsed time (seconds, minutes, hours) only on access. Th
 # TODO (if needed)
 * Add a demo
 * Make a custom page including this demo
+* Add some Timer functions
 * Include Object.defineProperty polyfill / shim
 * Add special ticks handling (after `x` ticks, every `x` ticks)
