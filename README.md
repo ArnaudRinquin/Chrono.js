@@ -117,7 +117,7 @@ Chrono.js will compute elapsed time (seconds, minutes, hours) only on access. Th
 If you want to build Chrono.js from its source, you can just use grunt.
 3 tasks are available:
 
-* `grunt` will build Chrono.js and run fast tests
+* `grunt` will build Chrono.js and run fast (<1sec) tests
 * `grunt build` will just build Chrono.js without running any tests (you don't want that)
 * `grunt all` will build and run long tests (hours)
 

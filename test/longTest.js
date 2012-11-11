@@ -81,7 +81,7 @@
           });
           return c.start();
         });
-        return it('should be correct after a stop', function(done) {
+        it('should be correct after a stop', function(done) {
           var c, timeoutCallback;
           c = new Chrono(1000);
           timeoutCallback = function() {
@@ -93,6 +93,18 @@
           };
           c.start();
           return setTimeout(timeoutCallback, 2010);
+        });
+        return it('should be correct after a default reset', function(done) {
+          var c;
+          c = new Chrono(1000, function(ticks, chrono) {
+            c.seconds.should.equal(ticks);
+            if (ticks > 0) {
+              c.reset();
+              c.seconds.should.equal(0);
+              return done();
+            }
+          });
+          return c.start();
         });
       });
     });

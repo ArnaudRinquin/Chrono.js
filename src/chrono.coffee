@@ -51,15 +51,13 @@ if Object.defineProperty
   Object.defineProperty Chrono.prototype, '__date',
     get:-> new Date -3600000 + @__ticks * @precision #remove the extra hour
     set:(date)->
-      @__ticks = date.getTime() / @precision
+      @__ticks = (3600000 + date.getTime()) / @precision
       date
 
   Object.defineProperty Chrono.prototype, 'seconds',
     get:-> @__date.getSeconds()
     set:(seconds)->
-      newDate = @__date
-      newDate.setSeconds seconds
-      @__date = newDate
+      @__date = new Date(@__date.setSeconds seconds)
       seconds
 
   Object.defineProperty Chrono.prototype, 'minutes',

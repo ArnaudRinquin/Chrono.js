@@ -65,3 +65,12 @@ describe 'Chrono, long tests', ->
           done()
         c.start()
         setTimeout timeoutCallback, 2010
+
+      it 'should be correct after a default reset', (done)->
+        c = new Chrono 1000, (ticks, chrono)->
+          c.seconds.should.equal ticks
+          if (ticks > 0)
+            c.reset()
+            c.seconds.should.equal 0
+            done()
+        c.start()

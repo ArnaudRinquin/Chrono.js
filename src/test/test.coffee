@@ -67,8 +67,21 @@ describe 'Chrono', ->
         c.minutes.should.equal 0
         c.hours.should.equal 0
 
-      it 'should be correct after a default reset'
-      it 'should be correct after a non-default reset'
+      it 'should be correct after a non-default reset', ->
+        c = new Chrono 1000
+        c.reset 60 * 60 * 2 + 34 * 60 + 56 #set to 2h34min56 seconds
+        c.seconds.should.equal 56
+        c.minutes.should.equal 34
+        c.hours.should.equal 2
+
     describe 'Write', ->
-      it 'can be written before start'
+      it 'can be written before start', ->
+        c = new Chrono 1000, (ticks, chrono)->
+          #check tick is right and stop()
+          ticks.should.equal(60 * 60 * 2 + 34 * 60 + 56)
+          c.stop()
+        c.seconds = 56
+        c.minutes = 34
+        c.hours = 2
+        c.start()
       it 'can be written while ticking'
