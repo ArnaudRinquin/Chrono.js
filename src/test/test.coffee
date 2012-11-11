@@ -84,4 +84,14 @@ describe 'Chrono', ->
         c.minutes = 34
         c.hours = 2
         c.start()
-      it 'can be written while ticking'
+      it 'can be written while ticking', (done)->
+        c = new Chrono 100, (ticks, chrono)->
+          return if ticks < 2 #wait 2 ticks
+          if ticks is 2
+            chrono.seconds = 3
+            chrono.minutes = 4
+            chrono.hours = 5
+            return
+          ticks.should.equal 3 + 3 * 10 + 4 * 600 + 5 * 36000
+          done()
+        c.start()
