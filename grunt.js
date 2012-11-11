@@ -30,12 +30,13 @@ module.exports = function(grunt) {
       all:{
         src:"test/**/*.js",
         options:{
-          reporter:'spec'
+          reporter:'spec',
+          slow:'1000'
         }
       }
     }
   });
 
   grunt.registerTask('default', 'clean coffeelint coffee min simplemocha');
-  
+
 };
