@@ -72,7 +72,7 @@ chrono.stop().ticking;
 >false
 chrono.start().reset().ticking;
 >false
-```
+``
 
 ## Handling ticks
 The handlers you pass to your Chrono will receive to parameters every at ticks: the current `tick`number and the `chrono ` itself.
@@ -112,6 +112,16 @@ chrono.seconds = 62; //3h51min2sec (=3h50min62sec)
 
 # Chrono.js is optimized
 Chrono.js will compute elapsed time (seconds, minutes, hours) only on access. This optimization is only available on ECMA5 compliant env (use of Object.defineProperty). You may want to use a polyfill to enjoy this feature.
+
+# Building Chrono.js
+If you want to build Chrono.js from its source, you can just use grunt.
+3 tasks are available:
+
+* `grunt` will build Chrono.js and run fast tests
+* `grunt build` will just build Chrono.js without running any tests (you don't want that)
+* `grunt all` will build and run long tests (hours)
+
+You should not have to run long tests unless you change something 'hours' attribute related because I already run them for you.
 
 # TODO (if needed)
 * Add a demo
