@@ -49,7 +49,7 @@ if Object.defineProperty
   Chrono::optimized = true
 
   Object.defineProperty Chrono.prototype, '__date',
-    get:-> new Date -3600000 - @__ticks * @precision #remove the extra hour
+    get:-> new Date -3600000 + @__ticks * @precision #remove the extra hour
     set:(date)->
       @__ticks = date.getTime() / @precision
       date
