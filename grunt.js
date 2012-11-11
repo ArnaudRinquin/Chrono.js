@@ -27,16 +27,27 @@ module.exports = function(grunt) {
       }
     },
     simplemocha:{
-      all:{
-        src:"test/**/*.js",
+      shortTests:{
+        src:"test/test.js",
+        options:{
+          reporter: 'spec',
+          slow: 200,
+          timeout: 1000
+        }
+      },
+      longTests:{
+        src:"test/longTest.js",
         options:{
           reporter:'spec',
-          slow:'1000'
+          slow: 1000000000,
+          timeout: 100000000
         }
       }
     }
   });
 
-  grunt.registerTask('default', 'clean coffeelint coffee min simplemocha');
+  grunt.registerTask('build', 'clean coffeelint coffee min');
+  grunt.registerTask('all', 'default simplemocha:longTests');
+  grunt.registerTask('default', 'build simplemocha:shortTests');
 
 };
