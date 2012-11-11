@@ -57,7 +57,13 @@ describe 'Chrono', ->
       c = new Chrono 100, callDoneAndStopHandler
       c.start().stop()
 
-    it 'call all of them'
+    it 'call all of them', (done)->
+      callbacksCalled = 0
+      callback = (ticks, chrono)->
+        callbacksCalled++
+        done() if callbacksCalled is 5
+      c = new Chrono(100, callback, callback, callback, callback, callback)
+      c.start().stop()
 
   describe 'Time attributes', ->
     describe 'Read', ->
@@ -79,19 +85,19 @@ describe 'Chrono', ->
         c = new Chrono 1000, (ticks, chrono)->
           #check tick is right and stop()
           ticks.should.equal(60 * 60 * 2 + 34 * 60 + 56)
-          c.stop()
         c.seconds = 56
         c.minutes = 34
         c.hours = 2
-        c.start()
+        c.start().stop()
       it 'can be written while ticking', (done)->
-        c = new Chrono 100, (ticks, chrono)->
+        c = new Chrono 10, (ticks, chrono)->
           return if ticks < 2 #wait 2 ticks
           if ticks is 2
             chrono.seconds = 3
             chrono.minutes = 4
             chrono.hours = 5
             return
-          ticks.should.equal 3 + 3 * 10 + 4 * 600 + 5 * 36000
+          ticks.should.equal 3 + 3 * 100 + 4 * 6000 + 5 * 360000
+          c.stop()
           done()
         c.start()
