@@ -22,7 +22,7 @@ Within node.js, require it like this:
 
 ```javascript
 Chrono = require('Chrono').Chrono
-```
+``
 
 Chrono.js does not rely on any library.
 
@@ -32,13 +32,32 @@ Chrono.js does not rely on any library.
 
 ### Settings
 
-`precision` : (delay between ticks) and the handlers that will be called at every ticks. You can add handler later though.
+`precision` : delay in miliseconds between ticks. Default is `1000`, as one second
 
 ``` javascript
-c = new Chrono({precision:100}, function(ticks, chrono) { // tick every 100ms
+c = new Chrono({precision:100});
+```
+
+### Handlers
+
+`handlers` params are callback function that will be called at every tick. They will be called with `ticks` and `chrono` parameters.
+
+`ticks` represent the amount of ticks the Chrono has made. If you reset the
+Chrono to a certain amount of ticks or changed the time attributes, theses 
+changes will be taken into account.
+
+``` javascript
+c = new Chrono({}, function(ticks, chrono) { // tick every 100ms
   console.log("ticks " + ticks);
 });
 ```
+
+## Attributes
+
+You can access these attributes:
+
+* `ticking` (read-only)
+* `settings`, the default settings merged with the settings you passed
 
 ## Controls
 You can use the 3 self-explained chainable functions:
