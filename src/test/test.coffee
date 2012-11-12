@@ -5,20 +5,28 @@ expect = chai.expect
 Chrono = (require '../lib/chrono').Chrono
 
 describe 'Chrono', ->
-  describe 'Creation', ->
-    it 'should be exported properly', ->
+  describe 'Constructor', ->
+    it 'is exported properly', ->
       expect(Chrono).to.exist
-    
+
     it 'can be created with default value', ->
       c = new Chrono()
       c.should.be.ok
       c.settings.precision.should.equal 1000
+      expect(c.settings.maxTicks).to.not.exist
+      c.settings.stopAtMaxTicks.should.be.false
     
-    it 'can also be created with custom precision', ->
+    it 'can be created with specific precision', ->
       c = new Chrono {precision:100}
       c.should.be.ok
       c.settings.precision.should.equal 100
     
+    it 'can be created with specific maxTicks value', ->
+      c = new Chrono
+        precision: 100,
+        maxTicks: 50
+      c.settings.maxTicks.should.equal 50
+
     it 'one handler can be passed', ->
       handler = (ticks, chrono) -> console.log ticks, chrono
       c = new Chrono {precision:200}, handler
@@ -105,3 +113,38 @@ describe 'Chrono', ->
           c.stop()
           done()
         c.start()
+  describe 'Max Ticks event', ->
+    it 'should call handlers with maxTicks reached flag', (done)->
+      s =
+        precision:10,
+        maxTicks: 5
+
+      c = new Chrono s, (ticks, chrono, maxTicksReached)->
+        if ticks is 5
+          expect(maxTicksReached).to.be.true
+          c.stop()
+          done()
+      c.start()
+  describe 'stopAtMaxTicks', ->
+    it 'by default should not stop when maxTicks is reached', (done)->
+      s =
+        precision:10,
+        maxTicks: 5
+
+      c = new Chrono s, (ticks, chrono, maxTicksReached)->
+        if ticks is 6
+          c.stop()
+          done()
+      c.start()
+    it 'it should stop when maxTicks is reached if specified', (done)->
+      s =
+        precision:10,
+        maxTicks: 5,
+        stopAtMaxTicks: true
+
+      c = new Chrono s, (ticks, chrono, maxTicksReached)->
+        if ticks is 5
+          c.ticking.should.be.false
+          c.stop()
+          done()
+      c.start()

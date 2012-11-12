@@ -5,7 +5,9 @@
 class Chrono
   constructor:(settings, @tickHandlers...)->
     defaults = {
-      precision: 1000
+      precision: 1000,
+      maxTicks: undefined,
+      stopAtMaxTicks: false
     }
     @settings = extend defaults, settings
     @reset()
@@ -35,6 +37,7 @@ class Chrono
   # Compute elapsed time, minute and seconds attributes (unless optimized)
   __tick:->
     @__ticks++
+    @stop() if @settings.stopAtMaxTicks and @__ticks is @settings.maxTicks
     unless Chrono::optimized
       elapsedSeconds = Math.floor(@__ticks * @settings.precision / 1000)
       @seconds = elapsedSeconds % 60
@@ -44,7 +47,7 @@ class Chrono
     this
 
   __callHandlers:->
-    tickHandler @__ticks, this for tickHandler in @tickHandlers
+    h @__ticks, this, @__ticks is @settings.maxTicks for h in @tickHandlers
     this
 
 
