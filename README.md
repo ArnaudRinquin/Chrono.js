@@ -93,7 +93,7 @@ chrono.stop().ticking;
 >false
 chrono.start().reset().ticking;
 >false
-``
+```
 
 ## Handling ticks
 The handlers you pass to your Chrono will receive to parameters every at ticks: the current `tick`number and the `chrono ` itself.

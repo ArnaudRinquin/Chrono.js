@@ -117,10 +117,10 @@ describe 'Chrono', ->
     it 'should call handlers with maxTicks reached flag', (done)->
       s =
         precision:10,
-        maxTicks: 5
+        maxTicks: 3
 
       c = new Chrono s, (ticks, chrono, maxTicksReached)->
-        if ticks is 5
+        if ticks is 3
           expect(maxTicksReached).to.be.true
           c.stop()
           done()
@@ -148,3 +148,6 @@ describe 'Chrono', ->
           c.stop()
           done()
       c.start()
+  describe 'toMax Time Attributes', ->
+    it 'attributes should be undefined when maxTicks is undefined'
+    it 'attributes should be '
