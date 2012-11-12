@@ -3,7 +3,11 @@
 # Allow tick handlers to be called. Handlers can be push or remove by
 # direct manipulation of @tickHandlers attribute.
 class Chrono
-  constructor:(@precision = 1000, @tickHandlers...)->
+  constructor:(settings, @tickHandlers...)->
+    defaults = {
+      precision: 1000
+    }
+    @settings = extend defaults, settings
     @reset()
 
   # Start the ticking, do nothing if already started
@@ -11,7 +15,7 @@ class Chrono
     return this if @__handlers #handler means it's already stared so do nothing
     @__callHandlers() #call handlers @ start
     # make use of '=>' to ensure the scope
-    @__handlers = setInterval ((args)=>@__tick args), @precision
+    @__handlers = setInterval ((args)=>@__tick args), @settings.precision
     @ticking = true
     this
 
@@ -32,7 +36,7 @@ class Chrono
   __tick:->
     @__ticks++
     unless Chrono::optimized
-      elapsedSeconds = Math.floor(@__ticks * precision / 1000)
+      elapsedSeconds = Math.floor(@__ticks * @settings.precision / 1000)
       @seconds = elapsedSeconds % 60
       @minutes = Math.floor(elapsedSeconds / 60) % 60
       @hours = Math.floor elapsedSeconds / 3600
@@ -49,9 +53,10 @@ if Object.defineProperty
   Chrono::optimized = true
 
   Object.defineProperty Chrono.prototype, '__date',
-    get:-> new Date -3600000 + @__ticks * @precision #remove the extra hour
+    # Date(0) time is 01:00:00 so we have an hour delta
+    get:-> new Date -3600000 + @__ticks * @settings.precision
     set:(date)->
-      @__ticks = (3600000 + date.getTime()) / @precision
+      @__ticks = (3600000 + date.getTime()) / @settings.precision
       date
 
   Object.defineProperty Chrono.prototype, 'seconds',
@@ -75,6 +80,11 @@ if Object.defineProperty
       newDate.setHours hours
       @__date = newDate
       hours
+
+extend = (object, properties)->
+  for key, val of properties
+    object[key] = val
+  object
 
 # Module exportation
 root = exports ? this

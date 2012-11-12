@@ -39,7 +39,9 @@
             return done();
           }
         };
-        c = new Chrono(100, callDone);
+        c = new Chrono({
+          precision: 100
+        }, callDone);
         timeoutHandle = setErrTimeout();
         return c.start();
       });
@@ -62,7 +64,9 @@
             return done(new Error('handler has been called after chrono has been stopped'));
           }
         };
-        c = new Chrono(100, callDone);
+        c = new Chrono({
+          precision: 100
+        }, callDone);
         return c.start();
       });
     });
@@ -70,7 +74,9 @@
       return describe('Read', function() {
         it('should be correct while ticking', function(done) {
           var c;
-          c = new Chrono(1000, function(ticks, chrono) {
+          c = new Chrono({
+            precision: 1000
+          }, function(ticks, chrono) {
             chrono.seconds.should.equal(ticks);
             chrono.minutes.should.equal(0);
             chrono.hours.should.equal(0);
@@ -83,7 +89,7 @@
         });
         it('should be correct after a stop', function(done) {
           var c, timeoutCallback;
-          c = new Chrono(1000);
+          c = new Chrono;
           timeoutCallback = function() {
             c.stop();
             c.seconds.should.equal(2);
@@ -96,7 +102,9 @@
         });
         return it('should be correct after a default reset', function(done) {
           var c;
-          c = new Chrono(1000, function(ticks, chrono) {
+          c = new Chrono({
+            precision: 1000
+          }, function(ticks, chrono) {
             c.seconds.should.equal(ticks);
             if (ticks > 0) {
               c.reset();

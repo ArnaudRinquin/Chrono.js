@@ -12,23 +12,23 @@ describe 'Chrono', ->
     it 'can be created with default value', ->
       c = new Chrono()
       c.should.be.ok
-      c.precision.should.equal 1000
+      c.settings.precision.should.equal 1000
     
     it 'can also be created with custom precision', ->
-      c = new Chrono 100
+      c = new Chrono {precision:100}
       c.should.be.ok
-      c.precision.should.equal 100
+      c.settings.precision.should.equal 100
     
     it 'one handler can be passed', ->
       handler = (ticks, chrono) -> console.log ticks, chrono
-      c = new Chrono 200, handler
+      c = new Chrono {precision:200}, handler
       c.tickHandlers.should.not.be.empty
       c.tickHandlers.should.contain handler
     
     it 'several handlers can be passed', ->
       handler2 = (ticks, chrono) -> console.log ticks, chrono
       handler3 = (ticks, chrono) -> console.log chrono, ticks
-      c = new Chrono 200, handler2, handler3
+      c = new Chrono {precision:200}, handler2, handler3
       c.tickHandlers.should.not.be.empty
       c.tickHandlers.should.contain handler2, handler3
   
@@ -54,27 +54,31 @@ describe 'Chrono', ->
           done()
         else
           throw new Error 'ticks is not 0'
-      c = new Chrono 100, callDoneAndStopHandler
+      c = new Chrono {precision:100}, callDoneAndStopHandler
       c.start().stop()
 
     it 'call all of them', (done)->
       callbacksCalled = 0
       callback = (ticks, chrono)->
         callbacksCalled++
-        done() if callbacksCalled is 5
-      c = new Chrono(100, callback, callback, callback, callback, callback)
+        if callbacksCalled is 4
+          chrono.stop()
+          done()
+        if ticks > 0
+          done new Error 'not all handlers were called'
+      c = new Chrono({precision:100}, callback, callback, callback, callback)
       c.start().stop()
 
   describe 'Time attributes', ->
     describe 'Read', ->
       it 'should be correct before start', ->
-        c = new Chrono 100
+        c = new Chrono {precision:100}
         c.seconds.should.equal 0
         c.minutes.should.equal 0
         c.hours.should.equal 0
 
       it 'should be correct after a non-default reset', ->
-        c = new Chrono 1000
+        c = new Chrono
         c.reset 60 * 60 * 2 + 34 * 60 + 56 #set to 2h34min56 seconds
         c.seconds.should.equal 56
         c.minutes.should.equal 34
@@ -82,7 +86,7 @@ describe 'Chrono', ->
 
     describe 'Write', ->
       it 'can be written before start', ->
-        c = new Chrono 1000, (ticks, chrono)->
+        c = new Chrono {precision:1000}, (ticks, chrono)->
           #check tick is right and stop()
           ticks.should.equal(60 * 60 * 2 + 34 * 60 + 56)
         c.seconds = 56
@@ -90,7 +94,7 @@ describe 'Chrono', ->
         c.hours = 2
         c.start().stop()
       it 'can be written while ticking', (done)->
-        c = new Chrono 10, (ticks, chrono)->
+        c = new Chrono {precision:10}, (ticks, chrono)->
           return if ticks < 2 #wait 2 ticks
           if ticks is 2
             chrono.seconds = 3

@@ -28,12 +28,14 @@ Chrono.js does not rely on any library.
 
 # API
 ## Creation
-`new Chrono(precision, [*handlers])`
+`new Chrono([settings], [*handlers])`
 
-You have to pass the precision (delay between ticks) and the handlers that will be called at every ticks. You can add handler later though.
+### Settings
+
+`precision` : (delay between ticks) and the handlers that will be called at every ticks. You can add handler later though.
 
 ``` javascript
-c = new Chrono(100, function(ticks, chrono) { // tick every 100ms
+c = new Chrono({precision:100}, function(ticks, chrono) { // tick every 100ms
   console.log("ticks " + ticks);
 });
 ```
@@ -54,7 +56,7 @@ Let's say it's not clear enough, here are some hints:
 
 ``` javascript
 // 100ms Chrono
-chrono = new Chrono(100);
+chrono = new Chrono({precision:100});
 chrono.start();
 // ... restart from 5 seconds
 chrono.reset(5000 / 100).start();
@@ -63,7 +65,7 @@ chrono.reset(5000 / 100).start();
 You can know the chrono's state from it's `ticking` attribute:
 
 ```javascript
-chrono = new Chrono(100);
+chrono = new Chrono({precision:100});
 chrono.ticking;
 >false
 chrono.start().ticking;
@@ -78,7 +80,7 @@ chrono.start().reset().ticking;
 The handlers you pass to your Chrono will receive to parameters every at ticks: the current `tick`number and the `chrono ` itself.
 
 ``` javascript
-c = new Chrono(100, function(tick, chrono) { // tick every 100ms
+c = new Chrono({precision:100}, function(tick, chrono) { // tick every 100ms
   console.log("this the " + tick + "th tick");
   if (tick > 100) { // stop after 100 * 100 = 10.000ms = 10 secs
     chrono.stop();
@@ -90,7 +92,7 @@ c = new Chrono(100, function(tick, chrono) { // tick every 100ms
 You can access elapsed seconds (0-59), minutes (0-59) and hours (0+) by direcly accessing the corresponding attributes.
 
 ``` javascript
-chrono = new Chrono(1000); // 1 tick = 1 second
+chrono = new Chrono({precision:1000}); // 1 tick = 1 second
 chrono.reset(3 * 3600 + 24 * 60 + 12); // set to 3h24min12sec
 console.log(chrono.hours + 'h' + chrono.minutes + 'min' + chrono.seconds + 'sec');
 >3h24min12sec
@@ -99,7 +101,7 @@ console.log(chrono.hours + 'h' + chrono.minutes + 'min' + chrono.seconds + 'sec'
 You can also set them individually (*only in optimized mode, see below*):
 
 ```
-chrono = new Chrono(1000); // 1 tick = 1 second
+chrono = new Chrono({precision:1000}); // 1 tick = 1 second
 chrono.reset(3 * 3600 + 24 * 60 + 12); // set to 3h24min12sec
 chrono.hours = 4; //4h24min12sec
 chrono.minutes = 10; //4h10min12sec

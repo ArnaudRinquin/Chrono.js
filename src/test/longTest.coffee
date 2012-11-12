@@ -23,7 +23,7 @@ describe 'Chrono, long tests', ->
           c.stop()
           clearTimeout(timeoutHandle) if timeoutHandle
           done()
-      c = new Chrono 100, callDone
+      c = new Chrono {precision:100}, callDone
 
       timeoutHandle = setErrTimeout()
       c.start()
@@ -41,12 +41,12 @@ describe 'Chrono, long tests', ->
           setTimeout checkChrono , 200
         if ticks > 2
           done new Error 'handler has been called after chrono has been stopped'
-      c = new Chrono 100, callDone
+      c = new Chrono {precision:100}, callDone
       c.start()
   describe 'Time attributes', ->
     describe 'Read', ->
       it 'should be correct while ticking', (done)->
-        c = new Chrono 1000, (ticks, chrono)->
+        c = new Chrono {precision:1000}, (ticks, chrono)->
           chrono.seconds.should.equal ticks
           chrono.minutes.should.equal 0
           chrono.hours.should.equal 0
@@ -56,7 +56,7 @@ describe 'Chrono, long tests', ->
         c.start()
 
       it 'should be correct after a stop', (done)->
-        c = new Chrono 1000
+        c = new Chrono
         timeoutCallback = ->
           c.stop()
           c.seconds.should.equal 2
@@ -67,7 +67,7 @@ describe 'Chrono, long tests', ->
         setTimeout timeoutCallback, 2010
 
       it 'should be correct after a default reset', (done)->
-        c = new Chrono 1000, (ticks, chrono)->
+        c = new Chrono {precision:1000}, (ticks, chrono)->
           c.seconds.should.equal ticks
           if (ticks > 0)
             c.reset()
