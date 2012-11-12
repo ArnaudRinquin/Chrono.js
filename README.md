@@ -22,7 +22,7 @@ Within node.js, require it like this:
 
 ```javascript
 Chrono = require('Chrono').Chrono
-``
+```
 
 Chrono.js does not rely on any library.
 
