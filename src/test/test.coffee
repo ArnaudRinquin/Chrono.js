@@ -148,6 +148,20 @@ describe 'Chrono', ->
           c.stop()
           done()
       c.start()
+
   describe 'toMax Time Attributes', ->
-    it 'attributes should be undefined when maxTicks is undefined'
-    it 'attributes should be '
+    it 'are undefined when maxTicks is undefined', ->
+      c = new Chrono
+      expect(c.secondsToMax).to.not.exist
+      expect(c.minutesToMax).to.not.exist
+      expect(c.hoursToMax).to.not.exist
+
+    it 'are be right when maxTicks is set, while ticking', ->
+      s =
+        precision:1000,
+        maxTicks:7200 + 1200 + 40 #2h20min40sec
+      c = new Chrono s
+      c.reset(3600 + 720 + 10) #1h12min10sec
+      c.secondsToMax.should.equal 30
+      c.minutesToMax.should.equal 8
+      c.hoursToMax.should.equal 1

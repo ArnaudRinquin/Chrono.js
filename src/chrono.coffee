@@ -84,6 +84,27 @@ if Object.defineProperty
       @__date = newDate
       hours
 
+  Object.defineProperty Chrono.prototype, '__dateToMax',
+    # Date(0) time is 01:00:00 so we have an hour delta
+    get:->
+      maxDate = new Date -3600000 + @settings.maxTicks * @settings.precision
+      new Date -3600000 + maxDate.getTime() - @__date.getTime()
+
+  Object.defineProperty Chrono.prototype, 'secondsToMax',
+    get:->
+      return undefined unless @settings.maxTicks
+      @__dateToMax.getSeconds()
+
+  Object.defineProperty Chrono.prototype, 'minutesToMax',
+    get:->
+      return undefined unless @settings.maxTicks
+      @__dateToMax.getMinutes()
+
+  Object.defineProperty Chrono.prototype, 'hoursToMax',
+    get:->
+      return undefined unless @settings.maxTicks
+      @__dateToMax.getHours()
+
 extend = (object, properties)->
   for key, val of properties
     object[key] = val
