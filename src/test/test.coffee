@@ -159,9 +159,9 @@ describe 'Chrono', ->
     it 'are be right when maxTicks is set, while ticking', ->
       s =
         precision:1000,
-        maxTicks:7200 + 1200 + 40 #2h20min40sec
+        maxTicks:3 * 3600 + 20*60 + 40 #3h20min40sec
       c = new Chrono s
       c.reset(3600 + 720 + 10) #1h12min10sec
       c.secondsToMax.should.equal 30
       c.minutesToMax.should.equal 8
-      c.hoursToMax.should.equal 1
+      c.hoursToMax.should.equal 2

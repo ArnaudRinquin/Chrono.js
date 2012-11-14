@@ -85,10 +85,11 @@ if Object.defineProperty
       hours
 
   Object.defineProperty Chrono.prototype, '__dateToMax',
-    # Date(0) time is 01:00:00 so we have an hour delta
     get:->
-      maxDate = new Date -3600000 + @settings.maxTicks * @settings.precision
-      new Date -3600000 + maxDate.getTime() - @__date.getTime()
+      s = @settings
+      remainingMilis = (s.maxTicks - @__ticks) * s.precision
+      # Date(0) time is 01:00:00 so we have an hour delta, correct this
+      new Date -3600000 + remainingMilis
 
   Object.defineProperty Chrono.prototype, 'secondsToMax',
     get:->

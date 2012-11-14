@@ -32,22 +32,30 @@ Chrono.js does not rely on any library.
 
 ### Settings
 
-`precision` : delay in miliseconds between ticks. Default is `1000`, as one second
+* `precision`: delay in miliseconds between ticks. Default is `1000`, as one second
+* `maxTicks`: the maximum number of ticks the Chrono will run before alerting of its end.
+* `stopAtMaxTicks`: if set, stop the Chrono when maxTicks is reached.
 
 ``` javascript
-c = new Chrono({precision:100});
+c = new Chrono({
+  precision:100, // tick every 100ms = 0.1sec
+  maxTicks: 200, // max ticks is 200*100ms = 20sec
+  stopAtMaxTicks: true // stop after 20sec
+});
 ```
 
 ### Handlers
 
-`handlers` params are callback function that will be called at every tick. They will be called with `ticks` and `chrono` parameters.
+`handlers` params are callback function that will be called at every tick. They will be called with `ticks`, `chrono` and `maxTicksReached` parameters.
 
 `ticks` represent the amount of ticks the Chrono has made. If you reset the
 Chrono to a certain amount of ticks or changed the time attributes, theses 
 changes will be taken into account.
 
+`maxTicksReached` will be true if the current ticks is equal to the `maxTicks` settings you may have passed.
+
 ``` javascript
-c = new Chrono({}, function(ticks, chrono) { // tick every 100ms
+c = new Chrono({}, function(ticks, chrono, maxTicksReached) {
   console.log("ticks " + ticks);
 });
 ```
@@ -130,6 +138,15 @@ chrono.seconds = 2; //4h10min2sec
 chrono.minutes = -10; //3h50min12sec (= 4h-10min12sec)
 chrono.seconds = 62; //3h51min2sec (=3h50min62sec)
 ```
+
+## Accessing remaining seconds, minutes, hours until maxTicks
+You can access these values through the follwoing read-only attributes:
+
+* secondsToMax
+* minutesToMax
+* hoursToMax
+
+They will be undefined if maxTick is not set.
 
 # Chrono.js is optimized
 Chrono.js will compute elapsed time (seconds, minutes, hours) only on access. This optimization is only available on ECMA5 compliant env (use of Object.defineProperty). You may want to use a polyfill to enjoy this feature.
