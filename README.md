@@ -162,6 +162,27 @@ If you want to build Chrono.js from its source, you can just use grunt.
 You should not have to run long tests unless you change something 'hours' attribute related because I already run them for you.
 
 # TODO (if needed)
+## API Changes
+### Time Attributes
+Instead of access to separated attributes or functions, Chrono will implement only two functions based on the same behaviour `elapsed()` and `remaining()`.
+
+Both of them will take up to two arguments:
+
+* `unit`, 't|ticks|ms|miliseconds|s|seconds|m|minutes|h|hours', the unit to get or set
+* `value`, optionnal, setter to the unit maybe be prefixed with +,-,*, or /
+
+Regex for `value` is `/^(\+|-|\*|\/)?(\d+)$/`
+
+Important: setting the remaining time will not change the elapsed time but the maxTicks.
+
+chrono.elapsed('t'); // get elapsed ticks
+chrono.remaining('t'); // get maxTicks - elapsed('t')
+chrono.elapsed('s'); // get elapsed seconds
+chrono.elapsed('m', '+2') // added two hours to elapsed time
+chrono.remaining('h','3') // set hours = 3 to remaning time (!= remaning time = 3)
+
+Note to developer (myself and I): as Date will be used, they should be cached based on the ticks (current and maxTicks) they are computed in order to save ressources.
+
 * Add a demo
 * Make a custom page including this demo
 * Add some Timer functions

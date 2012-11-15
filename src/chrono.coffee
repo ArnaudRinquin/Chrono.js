@@ -1,8 +1,11 @@
-# An easy chronometer. Provide start / stop / reset functions.
-# You may want to specificy the precision a.k.a the delay between ticks.
-# Allow tick handlers to be called. Handlers can be push or remove by
-# direct manipulation of @tickHandlers attribute.
+###
+An easy chronometer. Provide start / stop / reset functions.
+You may want to specificy the precision a.k.a the delay between ticks.
+Allow tick handlers to be called. Handlers can be push or remove by
+direct manipulation of @tickHandlers attribute.
+###
 class Chrono
+
   constructor:(settings, @tickHandlers...)->
     defaults = {
       precision: 1000,
@@ -49,6 +52,20 @@ class Chrono
   __callHandlers:->
     h @__ticks, this, @__ticks is @settings.maxTicks for h in @tickHandlers
     this
+
+  __modifyDate:(date, changes)->
+    changeList = changes.match /(\+|-|\*|\/)?\d+(t|s|m|h)+/g
+    for change in changeList
+      [sign, value, unit] = change.match /^(\+|-|\*|\/)?(\d+)(t|s|m|h)$/
+      
+
+  ###
+  Returns a zero-ed Date + miliseconds
+  Usefull because new Date(0) has its time at 01:00:00
+  ###
+  __newDate:(milis)->
+    new Date -3600000 + milis
+
 
 
 if Object.defineProperty
