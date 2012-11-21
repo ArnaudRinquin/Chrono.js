@@ -55,7 +55,7 @@ describe 'Chrono', ->
       c = new Chrono
         precision: 100,
         max: 50,
-        stopAtMax: true
+        continueAtMax: true
       c.settings.continueAtMax.should.be.true
 
     it 'with one handler', ->

@@ -14,7 +14,7 @@ class Chrono
     defaults = {
       precision: 1000,
       max: undefined,
-      continueAfterMax: false
+      continueAtMax: false
     }
 
     if settings.precision
@@ -70,13 +70,14 @@ class Chrono
 
   ###
   Convert to milliseconds (integer) a given time object or string
-  obect may have ms, s, m and h property corresponding to milliseconds, seconds,
-  minutes and hours.
-  string is made one or several of humanly readable value-unit substrings, they
-  can be separated with spaced. Example : '1ms 2s 3m 4h'. Values may be greater
-  than matching unit range (90 minutes), it will just overflow.
-  Also, the order of the unit doesn't matter and, even if its hardly usefull, 
-  a unit can appears twice. Here is very strange valid example : 
+  obect may have ms, s, m and h property corresponding to milliseconds,
+  seconds, minutes and hours.
+  string is made one or several of humanly readable value-unit substrings.
+  They can be separated with spaced. Example : '1ms 2s 3m 4h'.
+  Values may be greater than matching unit range (90 minutes), it will just
+  overflow.
+  Also, the order of the unit doesn't matter and, even if its hardly usefull,
+  a unit can appears twice. Here is very strange valid example :
   '1h 2s1ms 90m 3h'. It equals to 1ms, 2s, 30min and 5h.
   ###
   toMilliseconds:(value)->
@@ -141,14 +142,14 @@ class Chrono
       s:date.getSeconds(),
       m:date.getMinutes(),
       h:date.getHours(),
-      t:date.getTime() + 3600000
+      t:date.getTime()
 
   ###
   Returns a zero-ed Date + milliseconds
   Needed because new Date(0) time is 01:00:00 and we want it 00:00:00
   ###
   __newDate:(milliseconds)->
-    new Date milliseconds - 3600000
+    new Duration milliseconds
 
   __objectToMilliseconds:(obj)->
     millis = 0
@@ -181,6 +182,43 @@ extend = (object, properties)->
   for key, val of properties
     object[key] = val
   object
+
+class Duration
+  constructor:(@__ms = 0)->
+    this
+
+  getTime:()->
+    @__ms
+
+  getMilliseconds:()->
+    @__ms % 1000
+
+  getSeconds:()->
+    Math.floor(@__ms / 1000) % 60
+
+  getMinutes:()->
+    Math.floor(@__ms / 60000) % 60
+
+  getHours:()->
+    Math.floor(@__ms / 3600000)
+
+  setTime:(@__ms)->
+    @__ms
+
+  setMilliseconds:(milliseconds)->
+    @__ms = @__ms - @getMilliseconds() + milliseconds
+
+  setSeconds:(seconds)->
+    delta = (seconds - @getSeconds()) * 1000
+    @__ms = @__ms + delta
+
+  setMinutes:(minutes)->
+    delta = (minutes - @getMinutes()) * 60000
+    @__ms = @__ms + delta
+
+  setHours:(hours)->
+    delta = (hours - @getHours()) * 3600000
+    @__ms = @__ms + delta
 
 # Module exportation
 root = exports ? this
