@@ -3,24 +3,32 @@ An easy chronometer. Provide start / stop / reset functions.
 You may want to specificy the precision a.k.a the delay between ticks.
 Passed handlers will be called at eahch tick. Current time can be read, write
 or updated. All time inputs can be given as integer (milliseconds) detailed
-object or human readable strings. A maximum time can be passed to raise a flag
-when reached. Default behaviour when max is reached is to stop but you can
+object or human readable strings. A toimum time can be passed to raise a flag
+when reached. Default behaviour when to is reached is to stop but you can
 avoid that.
 ###
 
 class Chrono
 
   constructor:(settings = {}, @tickHandlers...)->
+    # Allow to pass precision as a single setting
+    typeofSettings = typeof settings
+    if typeofSettings is 'number' or typeofSettings is 'string'
+      settings = precision: @toMilliseconds settings
+
     defaults = {
       precision: 1000,
-      max: undefined,
-      continueAtMax: false
+      from: 0,
+      to: undefined,
+      keepGoing: false
     }
 
     if settings.precision
       settings.precision = @toMilliseconds settings.precision
-    if settings.max
-      settings.max = @toMilliseconds settings.max
+    if settings.from
+      settings.from = @toMilliseconds settings.from
+    if settings.to
+      settings.to = @toMilliseconds settings.to
 
     @settings = extend defaults, settings
     @reset()
@@ -49,8 +57,8 @@ class Chrono
   ###
   Reset will pause the time and set the time to 0 or given time
   ###
-  reset:(@__ms = 0)->
-    @__ms = @toMilliseconds @__ms unless @__ms is 0
+  reset:(@__ms = @settings.from)->
+    @__ms = @toMilliseconds @__ms
     @stop()
     this
 
@@ -87,19 +95,19 @@ class Chrono
       when 'string' then millis = @__stringToMilliseconds value
       when 'object' then millis = @__objectToMilliseconds value
       else throw new Error 'unknow format : ' + value
-    millis
+    Math.floor millis
 
   ###
   Compute elapsed time, minute and seconds attributes (unless optimized)
   ###
   __tick:->
     @__ms+= @settings.precision
-    @stop() if (not @settings.continueAtMax) and @__ms >= @settings.max
+    @stop() if (not @settings.keepGoing) and @__ms >= @settings.to
     @__callHandlers()
     this
 
   __callHandlers:->
-    h @__ms, this, @__ms >= @settings.max for h in @tickHandlers
+    h @__ms, this, @__ms >= @settings.to for h in @tickHandlers
     this
 
   __applyDateChanges:(date, changes)->

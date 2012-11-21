@@ -13,8 +13,8 @@ describe 'Chrono', ->
       c = new Chrono()
       c.should.be.ok
       c.settings.precision.should.equal 1000
-      expect(c.settings.max).to.not.exist
-      c.settings.continueAtMax.should.be.false
+      expect(c.settings.to).to.not.exist
+      c.settings.keepGoing.should.be.false
 
     describe 'can be created with specific precision', ->
       it 'as an integer (milliseconds)', ->
@@ -32,31 +32,57 @@ describe 'Chrono', ->
         c.should.be.ok
         c.settings.precision.should.equal 1010
 
-    describe 'can be created with specific max value', ->
+    describe 'can be created with specific maximum value (to)', ->
       it 'as an integer (milliseconds)', ->
         c = new Chrono
           precision: 100,
-          max: 50
-        c.settings.max.should.equal 50
+          to: 50
+        c.settings.to.should.equal 50
 
       it 'or as an object', ->
         c = new Chrono
           precision: 100,
-          max: {ms:50, s:3}
-        c.settings.max.should.equal 3050
+          to: {ms:50, s:3}
+        c.settings.to.should.equal 3050
 
       it 'or as string', ->
         c = new Chrono
           precision: 100,
-          max: '2min 3sec 10ms'
-        c.settings.max.should.equal 123010
+          to: '2min 3sec 10ms'
+        c.settings.to.should.equal 123010
 
-    it 'can be created with continueAtMax set to true', ->
+    describe 'can be created with specific initial value (from)', ->
+      it 'as an integer (milliseconds)', ->
+        c = new Chrono
+          precision: 100,
+          from: 50
+        c.settings.from.should.equal 50
+
+      it 'or as an object', ->
+        c = new Chrono
+          precision: 100,
+          from: {ms:50, s:3}
+        c.settings.from.should.equal 3050
+
+      it 'or as string', ->
+        c = new Chrono
+          precision: 100,
+          from: '2min 3sec 10ms'
+        c.settings.from.should.equal 123010
+
+    it 'can be created with keepGoing set to true', ->
       c = new Chrono
         precision: 100,
-        max: 50,
-        continueAtMax: true
-      c.settings.continueAtMax.should.be.true
+        to: 50,
+        keepGoing: true
+      c.settings.keepGoing.should.be.true
+
+    it 'allows to directly pass precision as a single setting', ->
+      c = new Chrono 10000
+      c.settings.precision.should.equal 10000
+
+      c = new Chrono '15s'
+      c.settings.precision.should.equal 15000
 
     it 'with one handler', ->
       handler = (ticks, chrono) -> this
@@ -72,7 +98,7 @@ describe 'Chrono', ->
       c.tickHandlers.should.contain handler2, handler3
 
   describe 'Controls', ->
-    c = new Chrono()
+    c = new Chrono from:50
     it 'start', ->
       c.should.respondTo 'start'
       c.start().ticking.should.be.true
@@ -85,8 +111,8 @@ describe 'Chrono', ->
       it 'stops the ticking', ->
         c.start().reset().ticking.should.be.false
       
-      it 'and set time to t-0', ->
-        c.time().t.should.equal 0
+      it 'and set time to settings.from', ->
+        c.time().t.should.equal c.settings.from
       
       describe 'or to a specific time', ->
         
@@ -126,40 +152,40 @@ describe 'Chrono', ->
       c = new Chrono({precision:100}, callback, callback, callback, callback)
       c.start().stop()
 
-  describe 'max and stopAtMax', ->
-    it 'triggers max flag on events', (done)->
+  describe 'to and keepGoing', ->
+    it 'triggers to flag on events', (done)->
       s =
         precision:10,
-        max: 30
+        to: 30
 
-      c = new Chrono s, (time, chrono, maxReached)->
+      c = new Chrono s, (time, chrono, toReached)->
         if time is 30
-          expect(maxReached).to.be.true
+          expect(toReached).to.be.true
           c.stop()
           done()
       c.start()
 
-    it 'stop when max is reached if stopAtMax is set true', (done)->
+    it 'keep ticking if keepGoing is set true', (done)->
       s =
         precision:10,
-        max: 50,
-        continueAtMax: true
+        to: 50,
+        keepGoing: true
 
-      c = new Chrono s, (time, chrono, maxReached)->
+      c = new Chrono s, (time, chrono, toReached)->
         if time is 50
           c.ticking.should.be.true
-          maxReached.should.be.true
+          toReached.should.be.true
         if time is 60
           c.stop()
           done()
       c.start()
 
-    it 'stops at max if continueAtMax is not specified', (done)->
+    it 'stops at to if keepGoing is not specified', (done)->
       s =
         precision:10,
-        max: 50
+        to: 50
 
-      c = new Chrono s, (time, chrono, maxReached)->
+      c = new Chrono s, (time, chrono, toReached)->
         if time is 50
           c.ticking.should.be.false
           done()
