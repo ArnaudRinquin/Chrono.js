@@ -14,7 +14,7 @@ describe 'Chrono', ->
       c.should.be.ok
       c.settings.precision.should.equal 1000
       expect(c.settings.max).to.not.exist
-      c.settings.stopAtMax.should.be.false
+      c.settings.continueAtMax.should.be.false
 
     describe 'can be created with specific precision', ->
       it 'as an integer (milliseconds)', ->
@@ -51,12 +51,12 @@ describe 'Chrono', ->
           max: '2min 3sec 10ms'
         c.settings.max.should.equal 123010
 
-    it 'can be created with stopAtMax set to true', ->
+    it 'can be created with continueAtMax set to true', ->
       c = new Chrono
         precision: 100,
         max: 50,
         stopAtMax: true
-      c.settings.stopAtMax.should.be.true
+      c.settings.continueAtMax.should.be.true
 
     it 'with one handler', ->
       handler = (ticks, chrono) -> this
@@ -139,10 +139,11 @@ describe 'Chrono', ->
           done()
       c.start()
 
-    it 'do not stop when max is reached if stopAtMax is not set', (done)->
+    it 'stop when max is reached if stopAtMax is set true', (done)->
       s =
         precision:10,
-        max: 50
+        max: 50,
+        continueAtMax: true
 
       c = new Chrono s, (time, chrono, maxReached)->
         if time is 50
@@ -153,11 +154,10 @@ describe 'Chrono', ->
           done()
       c.start()
 
-    it 'stops at max if stopAtMax is specified', (done)->
+    it 'stops at max if continueAtMax is not specified', (done)->
       s =
         precision:10,
-        max: 50,
-        stopAtMax: true
+        max: 50
 
       c = new Chrono s, (time, chrono, maxReached)->
         if time is 50
@@ -246,7 +246,6 @@ describe 'Chrono', ->
           time.s.should.equal 2
           time.m.should.equal 3
           time.h.should.equal 4
-
 
         it 'even a mix of all available operations, spaced and not', ->
           c = new Chrono

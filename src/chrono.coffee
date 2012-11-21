@@ -1,27 +1,33 @@
 ###
 An easy chronometer. Provide start / stop / reset functions.
 You may want to specificy the precision a.k.a the delay between ticks.
-Allow tick handlers to be called. Handlers can be push or remove by
-direct manipulation of @tickHandlers attribute.
+Passed handlers will be called at eahch tick. Current time can be read, write
+or updated. All time inputs can be given as integer (milliseconds) detailed
+object or human readable strings. A maximum time can be passed to raise a flag
+when reached. Default behaviour when max is reached is to stop but you can
+avoid that.
 ###
+
 class Chrono
 
   constructor:(settings = {}, @tickHandlers...)->
     defaults = {
       precision: 1000,
       max: undefined,
-      stopAtMax: false
+      continueAfterMax: false
     }
 
     if settings.precision
-      settings.precision = @__toMilliseconds settings.precision
+      settings.precision = @toMilliseconds settings.precision
     if settings.max
-      settings.max = @__toMilliseconds settings.max
+      settings.max = @toMilliseconds settings.max
 
     @settings = extend defaults, settings
     @reset()
-
-  # Start the ticking, do nothing if already started
+  
+  ###
+  Starts ticking, do nothing if already started
+  ###
   start:->
     return this if @__handlers #handler means it's already stared so do nothing
     @__callHandlers() #call handlers @ start
@@ -30,17 +36,21 @@ class Chrono
     @ticking = true
     this
 
-  # Stop will just stop ticking if already started
-  # Don't use it as a toggle function, no effect if already paused
+  ###
+  Stop will just stop ticking if already started
+  Don't use it as a toggle function, no effect if already paused
+  ###
   stop:->
     clearInterval @__handlers if @__handlers
     @__handlers = null
     @ticking = false
     this
 
-  # Reset will pause the time and set the time to 0 or given time (in seconds)
+  ###
+  Reset will pause the time and set the time to 0 or given time
+  ###
   reset:(@__ms = 0)->
-    @__ms = @__toMilliseconds @__ms unless @__ms is 0
+    @__ms = @toMilliseconds @__ms unless @__ms is 0
     @stop()
     this
 
@@ -58,10 +68,32 @@ class Chrono
       @__ms = date.getTime()
     @__timeObject(date)
 
-  # Compute elapsed time, minute and seconds attributes (unless optimized)
+  ###
+  Convert to milliseconds (integer) a given time object or string
+  obect may have ms, s, m and h property corresponding to milliseconds, seconds,
+  minutes and hours.
+  string is made one or several of humanly readable value-unit substrings, they
+  can be separated with spaced. Example : '1ms 2s 3m 4h'. Values may be greater
+  than matching unit range (90 minutes), it will just overflow.
+  Also, the order of the unit doesn't matter and, even if its hardly usefull, 
+  a unit can appears twice. Here is very strange valid example : 
+  '1h 2s1ms 90m 3h'. It equals to 1ms, 2s, 30min and 5h.
+  ###
+  toMilliseconds:(value)->
+    millis = 0
+    switch(typeof value)
+      when 'number' then millis = value
+      when 'string' then millis = @__stringToMilliseconds value
+      when 'object' then millis = @__objectToMilliseconds value
+      else throw new Error 'unknow format : ' + value
+    millis
+
+  ###
+  Compute elapsed time, minute and seconds attributes (unless optimized)
+  ###
   __tick:->
     @__ms+= @settings.precision
-    @stop() if @settings.stopAtMax and @__ms >= @settings.max
+    @stop() if (not @settings.continueAtMax) and @__ms >= @settings.max
     @__callHandlers()
     this
 
@@ -117,15 +149,6 @@ class Chrono
   ###
   __newDate:(milliseconds)->
     new Date milliseconds - 3600000
-
-  __toMilliseconds:(value)->
-    millis = 0
-    switch(typeof value)
-      when 'number' then millis = value
-      when 'string' then millis = @__stringToMilliseconds value
-      when 'object' then millis = @__objectToMilliseconds value
-      else throw new Error 'unknow format : ' + value
-    millis
 
   __objectToMilliseconds:(obj)->
     millis = 0
