@@ -6,12 +6,18 @@ direct manipulation of @tickHandlers attribute.
 ###
 class Chrono
 
-  constructor:(settings, @tickHandlers...)->
+  constructor:(settings = {}, @tickHandlers...)->
     defaults = {
       precision: 1000,
-      maxTicks: undefined,
-      stopAtMaxTicks: false
+      max: undefined,
+      stopAtMax: false
     }
+
+    if settings.precision
+      settings.precision = @__toMilliseconds settings.precision
+    if settings.max
+      settings.max = @__toMilliseconds settings.max
+
     @settings = extend defaults, settings
     @reset()
 
@@ -33,95 +39,122 @@ class Chrono
     this
 
   # Reset will pause the time and set the time to 0 or given time (in seconds)
-  reset:(@__ticks = 0)->
+  reset:(@__ms = 0)->
+    @__ms = @__toMilliseconds @__ms unless @__ms is 0
     @stop()
     this
 
+  ###
+  time([changes])
+    changes: (operation value unit)* concatenation
+    opertation: +, -, *, / or nothing
+    value: integer
+    unit: ms, s, m or h
+  ###
+  time:(changes)->
+    date = @__newDate @__ms
+    if changes
+      date = @__applyDateChanges date, changes
+      @__ms = date.getTime()
+    @__timeObject(date)
+
   # Compute elapsed time, minute and seconds attributes (unless optimized)
   __tick:->
-    @__ticks++
-    @stop() if @settings.stopAtMaxTicks and @__ticks is @settings.maxTicks
-    unless Chrono::optimized
-      elapsedSeconds = Math.floor(@__ticks * @settings.precision / 1000)
-      @seconds = elapsedSeconds % 60
-      @minutes = Math.floor(elapsedSeconds / 60) % 60
-      @hours = Math.floor elapsedSeconds / 3600
+    @__ms+= @settings.precision
+    @stop() if @settings.stopAtMax and @__ms >= @settings.max
     @__callHandlers()
     this
 
   __callHandlers:->
-    h @__ticks, this, @__ticks is @settings.maxTicks for h in @tickHandlers
+    h @__ms, this, @__ms >= @settings.max for h in @tickHandlers
     this
 
-  __modifyDate:(date, changes)->
-    changeList = changes.match /(\+|-|\*|\/)?\d+(t|s|m|h)+/g
-    for change in changeList
-      [sign, value, unit] = change.match /^(\+|-|\*|\/)?(\d+)(t|s|m|h)$/
-      
+  __applyDateChanges:(date, changes)->
+    reg = /([+\-*\/]?)(\d+)(ms|[tsmh])\s?/g
+    modifications = []
+    modifications.push modif while modif = reg.exec changes
+    date = @__dateSingleChange(date, modif) for modif in modifications
+    date
+
+  __dateSingleChange:(date, change)->
+    [useless, operation, value, unit] = change
+    value = parseInt value
+    finalValue = 0
+
+    unless operation is undefined
+      switch unit
+        when 'ms' then finalValue = date.getMilliseconds()
+        when 's' then finalValue = date.getSeconds()
+        when 'm' then finalValue = date.getMinutes()
+        when 'h' then finalValue = date.getHours()
+
+      switch operation
+        when '+' then finalValue += value
+        when '-' then finalValue -= value
+        when '*' then finalValue *= value
+        when '/' then finalValue /= value
+        when '' then finalValue = value
+
+    switch unit
+      when 'ms' then date.setMilliseconds(finalValue)
+      when 's' then date.setSeconds(finalValue)
+      when 'm' then date.setMinutes(finalValue)
+      when 'h' then date.setHours(finalValue)
+
+    date
+
+  __timeObject:(date)->
+    time =
+      ms:date.getMilliseconds(),
+      s:date.getSeconds(),
+      m:date.getMinutes(),
+      h:date.getHours(),
+      t:date.getTime() + 3600000
 
   ###
-  Returns a zero-ed Date + miliseconds
-  Usefull because new Date(0) has its time at 01:00:00
+  Returns a zero-ed Date + milliseconds
+  Needed because new Date(0) time is 01:00:00 and we want it 00:00:00
   ###
-  __newDate:(milis)->
-    new Date -3600000 + milis
+  __newDate:(milliseconds)->
+    new Date milliseconds - 3600000
+
+  __toMilliseconds:(value)->
+    millis = 0
+    switch(typeof value)
+      when 'number' then millis = value
+      when 'string' then millis = @__stringToMilliseconds value
+      when 'object' then millis = @__objectToMilliseconds value
+      else throw new Error 'unknow format : ' + value
+    millis
+
+  __objectToMilliseconds:(obj)->
+    millis = 0
+    millis += obj.ms if typeof obj.ms is 'number'
+    millis += obj.s * 1000 if typeof obj.s is 'number'
+    millis += obj.m * 60000 if typeof obj.m is 'number'
+    millis += obj.h * 3600000 if typeof obj.h is 'number'
+    millis
+
+  __stringToMilliseconds:(string)->
+    reg = /(\d+)(ms|[tsmh])\s?/g
+    millis = 0
+    values = []
+    values.push value while value = reg.exec string
+    millis += @__subStringToMilliseconds value for value in values
+    millis
+
+  __subStringToMilliseconds:(value)->
+    [useless, numbr, unit] = value
+    numbr = parseInt numbr
+    millis = 0
+    switch unit
+      when 'ms' then millis = numbr
+      when 's' then millis = numbr * 1000
+      when 'm' then millis = numbr * 60000
+      when 'h' then millis = numbr * 3600000
+    millis
 
 
-
-if Object.defineProperty
-
-  Chrono::optimized = true
-
-  Object.defineProperty Chrono.prototype, '__date',
-    # Date(0) time is 01:00:00 so we have an hour delta
-    get:-> new Date -3600000 + @__ticks * @settings.precision
-    set:(date)->
-      @__ticks = (3600000 + date.getTime()) / @settings.precision
-      date
-
-  Object.defineProperty Chrono.prototype, 'seconds',
-    get:-> @__date.getSeconds()
-    set:(seconds)->
-      @__date = new Date(@__date.setSeconds seconds)
-      seconds
-
-  Object.defineProperty Chrono.prototype, 'minutes',
-    get:-> @__date.getMinutes()
-    set:(minutes)->
-      newDate = @__date
-      newDate.setMinutes minutes
-      @__date = newDate
-      minutes
-
-  Object.defineProperty Chrono.prototype, 'hours',
-    get:-> @__date.getHours()
-    set:(hours)->
-      newDate = @__date
-      newDate.setHours hours
-      @__date = newDate
-      hours
-
-  Object.defineProperty Chrono.prototype, '__dateToMax',
-    get:->
-      s = @settings
-      remainingMilis = (s.maxTicks - @__ticks) * s.precision
-      # Date(0) time is 01:00:00 so we have an hour delta, correct this
-      new Date -3600000 + remainingMilis
-
-  Object.defineProperty Chrono.prototype, 'secondsToMax',
-    get:->
-      return undefined unless @settings.maxTicks
-      @__dateToMax.getSeconds()
-
-  Object.defineProperty Chrono.prototype, 'minutesToMax',
-    get:->
-      return undefined unless @settings.maxTicks
-      @__dateToMax.getMinutes()
-
-  Object.defineProperty Chrono.prototype, 'hoursToMax',
-    get:->
-      return undefined unless @settings.maxTicks
-      @__dateToMax.getHours()
 
 extend = (object, properties)->
   for key, val of properties

@@ -33,13 +33,13 @@ Chrono.js does not rely on any library.
 ### Settings
 
 * `precision`: delay in miliseconds between ticks. Default is `1000`, as one second
-* `maxTicks`: the maximum number of ticks the Chrono will run before alerting of its end.
-* `stopAtMaxTicks`: if set, stop the Chrono when maxTicks is reached.
+* `max`: the maximum time (triggers a flag on events)
+* `stopAtMaxTicks`: if set, stop the Chrono when max is reached.
 
 ``` javascript
 c = new Chrono({
   precision:100, // tick every 100ms = 0.1sec
-  maxTicks: 200, // max ticks is 200*100ms = 20sec
+  max: 200, // max ticks is 200*100ms = 20sec
   stopAtMaxTicks: true // stop after 20sec
 });
 ```
