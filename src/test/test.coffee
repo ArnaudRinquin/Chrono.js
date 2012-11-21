@@ -166,98 +166,101 @@ describe 'Chrono', ->
       c.start()
 
   describe 'time', ->
-    it 'returns 0 values at t+0', ->
-      c = new Chrono
-      time = c.time()
+    describe 'returns a correct time object', ->
+      it 'at t+0', ->
+        c = new Chrono
+        time = c.time()
 
-      time.ms.should.equal 0
-      time.s.should.equal 0
-      time.m.should.equal 0
-      time.h.should.equal 0
+        time.ms.should.equal 0
+        time.s.should.equal 0
+        time.m.should.equal 0
+        time.h.should.equal 0
       
-    it 'return corresponding time at t+n', ->
-      c = new Chrono
-      c.reset 3750123 #1h2m30s
-      time = c.time()
-      
-      time.ms.should.equal 123
-      time.s.should.equal 30
-      time.m.should.equal 2
-      time.h.should.equal 1
+      it 'at any time', ->
+        c = new Chrono
+        c.reset 3750123 #1h2m30s
+        time = c.time()
+        
+        time.ms.should.equal 123
+        time.s.should.equal 30
+        time.m.should.equal 2
+        time.h.should.equal 1
+    describe 'can change time unit values', ->
+      it 'setting a unit', ->
+        c = new Chrono
+        
+        time = c.time '5s'
 
-    it 'can apply a unique change', ->
-      c = new Chrono
-      
-      time = c.time '5s'
+        time.s.should.equal 5
+        time.ms.should.equal 0
+        time.m.should.equal 0
+        time.h.should.equal 0
 
-      time.s.should.equal 5
-      time.ms.should.equal 0
-      time.m.should.equal 0
-      time.h.should.equal 0
+      it 'add to a unit value', ->
+        c = new Chrono
 
-    it 'can apply an addition change', ->
-      c = new Chrono
+        c.reset 30
+        time = c.time '+5ms'
 
-      c.reset 30
-      time = c.time '+5ms'
+        time.ms.should.equal 35
 
-      time.ms.should.equal 35
+      it 'substract to a unit value', ->
+        c = new Chrono
 
-    it 'can apply a substraction change', ->
-      c = new Chrono
+        c.reset 30000
+        time = c.time '-10s'
 
-      c.reset 30000
-      time = c.time '-10s'
+        time.s.should.equal 20
 
-      time.s.should.equal 20
+      it 'multiply a unit value', ->
+        c = new Chrono
 
-    it 'can apply a multiplicaton change', ->
-      c = new Chrono
+        c.reset 20000
+        time = c.time '*2s'
 
-      c.reset 20000
-      time = c.time '*2s'
+        time.s.should.equal 40
 
-      time.s.should.equal 40
+      it 'divide a unit value', ->
+        c = new Chrono
 
-    it 'can apply a division change', ->
-      c = new Chrono
+        c.reset 20000
+        time = c.time '/4s'
 
-      c.reset 20000
-      time = c.time '/4s'
+        time.s.should.equal 5
 
-      time.s.should.equal 5
+      describe 'any number of changes can be applied at once', ->
+        it 'with spaces between them', ->
+          c = new Chrono
+          time = c.time '43ms 15s 32m 6h'
 
-    it 'can apply several non-spaced changes', ->
-      c = new Chrono
-      time = c.time '1ms2s3m4h'
+          time.ms.should.equal 43
+          time.s.should.equal 15
+          time.m.should.equal 32
+          time.h.should.equal 6
+        
+        it 'without any space between them', ->
+          c = new Chrono
+          time = c.time '1ms2s3m4h'
 
-      time.ms.should.equal 1
-      time.s.should.equal 2
-      time.m.should.equal 3
-      time.h.should.equal 4
+          time.ms.should.equal 1
+          time.s.should.equal 2
+          time.m.should.equal 3
+          time.h.should.equal 4
 
-    it 'should apply several spaced changes', ->
-      c = new Chrono
-      time = c.time '43ms 15s 32m 6h'
 
-      time.ms.should.equal 43
-      time.s.should.equal 15
-      time.m.should.equal 32
-      time.h.should.equal 6
+        it 'even a mix of all available operations, spaced and not', ->
+          c = new Chrono
+          c.reset 3750300 #1h2m30s
+          time = c.time '+100ms -3s5m *2h'
 
-    it 'should apply several various changes, spaced or not', ->
-      c = new Chrono
-      c.reset 3750300 #1h2m30s
-      time = c.time '+100ms -3s5m *2h'
+          time.ms.should.equal 400
+          time.s.should.equal 27
+          time.m.should.equal 5
+          time.h.should.equal 2
 
-      time.ms.should.equal 400
-      time.s.should.equal 27
-      time.m.should.equal 5
-      time.h.should.equal 2
+          time = c.time '/2ms 3s *7m4h'
 
-      time = c.time '/2ms 3s *7m4h'
-
-      time.ms.should.equal 200
-      time.s.should.equal 3
-      time.m.should.equal 35
-      time.h.should.equal 4
+          time.ms.should.equal 200
+          time.s.should.equal 3
+          time.m.should.equal 35
+          time.h.should.equal 4

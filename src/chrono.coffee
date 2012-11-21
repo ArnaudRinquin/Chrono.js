@@ -154,8 +154,6 @@ class Chrono
       when 'h' then millis = numbr * 3600000
     millis
 
-
-
 extend = (object, properties)->
   for key, val of properties
     object[key] = val
