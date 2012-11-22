@@ -3,14 +3,24 @@ An easy chronometer. Provide start / stop / reset functions.
 You may want to specificy the precision a.k.a the delay between ticks.
 Passed handlers will be called at eahch tick. Current time can be read, write
 or updated. All time inputs can be given as integer (milliseconds) detailed
-object or human readable strings. A toimum time can be passed to raise a flag
-when reached. Default behaviour when to is reached is to stop but you can
-avoid that.
+object or human readable strings.
 ###
-
 class Chrono
 
-  constructor:(settings = {}, @tickHandlers...)->
+  ###
+  settings can be :
+    precision : time between ticks (as a string or as an integer)
+    or an object that include optionnal settings
+      precision, same as above
+      from : the time the Chrono is initiated at start and when reset
+      to: a maximum time that triggers a flag on events
+      keepGoing: if set to true, the Chrono will stop when reaching 'to'
+
+  handlers are your callbacks, they also can be added through 'bind()' and
+      removed with unbind. Note that they are NOT passed in an array
+
+  ###
+  constructor:(settings = {}, @handlers...)->
     # Allow to pass precision as a single setting
     typeofSettings = typeof settings
     if typeofSettings is 'number' or typeofSettings is 'string'
@@ -40,7 +50,7 @@ class Chrono
     return this if @__handlers #handler means it's already stared so do nothing
     @__callHandlers() #call handlers @ start
     # make use of '=>' to ensure the scope
-    @__handlers = setInterval ((args)=>@__tick args), @settings.precision
+    @__handle = setInterval ((args)=>@__tick args), @settings.precision
     @ticking = true
     this
 
@@ -49,8 +59,8 @@ class Chrono
   Don't use it as a toggle function, no effect if already paused
   ###
   stop:->
-    clearInterval @__handlers if @__handlers
-    @__handlers = null
+    clearInterval @__handle if @__handle
+    @__handle = null
     @ticking = false
     this
 
@@ -61,6 +71,25 @@ class Chrono
     @__ms = @toMilliseconds @__ms
     @stop()
     this
+
+  ###
+  Add an handler. It will be called with 3 arguments:
+     time: the current Chrono time in milliseconds
+     chrono: the Chrono itself
+     toIsReach: is the current time later than 'to'
+  ###
+  bind:(handlers...)->
+    @handlers.push(handler) for handler in handlers
+
+  ###
+  Remove an handler.
+  ###
+  unbind:(handlers...)->
+    for handler in handlers
+      for h, index in @handlers
+        @handlers.splice index, 1 if h is handler
+    this
+
 
   ###
   time([changes])
@@ -80,13 +109,6 @@ class Chrono
   Convert to milliseconds (integer) a given time object or string
   obect may have ms, s, m and h property corresponding to milliseconds,
   seconds, minutes and hours.
-  string is made one or several of humanly readable value-unit substrings.
-  They can be separated with spaced. Example : '1ms 2s 3m 4h'.
-  Values may be greater than matching unit range (90 minutes), it will just
-  overflow.
-  Also, the order of the unit doesn't matter and, even if its hardly usefull,
-  a unit can appears twice. Here is very strange valid example :
-  '1h 2s1ms 90m 3h'. It equals to 1ms, 2s, 30min and 5h.
   ###
   toMilliseconds:(value)->
     millis = 0
@@ -106,8 +128,11 @@ class Chrono
     @__callHandlers()
     this
 
+  ###
+  Just call handlers with current time in ms, this chrono, to is reached flag
+  ###
   __callHandlers:->
-    h @__ms, this, @__ms >= @settings.to for h in @tickHandlers
+    h @__ms, this, @__ms >= @settings.to for h in @handlers
     this
 
   __applyDateChanges:(date, changes)->
@@ -144,6 +169,9 @@ class Chrono
 
     date
 
+  ###
+  Build the current time object
+  ###
   __timeObject:(date)->
     time =
       ms:date.getMilliseconds(),
@@ -159,6 +187,9 @@ class Chrono
   __newDate:(milliseconds)->
     new Duration milliseconds
 
+  ###
+  Convert a time object to a duration in milliseconds
+  ###
   __objectToMilliseconds:(obj)->
     millis = 0
     millis += obj.ms if typeof obj.ms is 'number'
@@ -167,6 +198,9 @@ class Chrono
     millis += obj.h * 3600000 if typeof obj.h is 'number'
     millis
 
+    ###
+    Convert string such as '1s2m 3h' to corresponding duration in ms
+    ###
   __stringToMilliseconds:(string)->
     reg = /(\d+)(ms|[tsmh])\s?/g
     millis = 0
@@ -175,6 +209,9 @@ class Chrono
     millis += @__subStringToMilliseconds value for value in values
     millis
 
+    ###
+    Convert string suc as '1s' or '2m' to duration in ms
+    ###
   __subStringToMilliseconds:(value)->
     [useless, numbr, unit] = value
     numbr = parseInt numbr
@@ -186,11 +223,18 @@ class Chrono
       when 'h' then millis = numbr * 3600000
     millis
 
+###
+Overwrite properties into object. Used to overwrite settings into defaults
+###
 extend = (object, properties)->
   for key, val of properties
     object[key] = val
   object
 
+###
+Class covering the native Date functions I used to use. Same signatures except
+it does not have this 1 hour dif to be dealt with. Not sure about a perf boost.
+###
 class Duration
   constructor:(@__ms = 0)->
     this

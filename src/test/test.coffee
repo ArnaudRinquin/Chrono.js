@@ -87,15 +87,46 @@ describe 'Chrono', ->
     it 'with one handler', ->
       handler = (ticks, chrono) -> this
       c = new Chrono {precision:200}, handler
-      c.tickHandlers.should.not.be.empty
-      c.tickHandlers.should.contain handler
+      c.handlers.should.not.be.empty
+      c.handlers.should.contain handler
 
     it 'or several handlers', ->
       handler2 = (time, chrono) -> this
       handler3 = (time, chrono) -> this
       c = new Chrono {precision:200}, handler2, handler3
-      c.tickHandlers.should.not.be.empty
-      c.tickHandlers.should.contain handler2, handler3
+      c.handlers.should.not.be.empty
+      c.handlers.should.contain handler2, handler3
+
+  describe 'Bindings', ->
+    it 'can be added one by one', ->
+      c = new Chrono
+      handler = console.log
+      c.bind handler
+      c.handlers.should.contain handler
+
+    it 'can be added several at once', ->
+      c = new Chrono
+      handler1 = console.log
+      handler2 = console.log
+      c.bind handler1, handler2
+      c.handlers.should.contain handler1
+      c.handlers.should.contain handler2
+
+    it 'can be removed one by one', ->
+      c = new Chrono
+      handler = console.log
+      c.bind handler
+      c.unbind handler
+      c.handlers.should.not.contain handler
+
+    it 'can be removed several at once', ->
+      c = new Chrono
+      handler1 = console.log
+      handler2 = console.log
+      c.bind handler1, handler2
+      c.unbind handler1, handler2
+      c.handlers.should.not.contain handler1
+      c.handlers.should.not.contain handler2
 
   describe 'Controls', ->
     c = new Chrono from:50
