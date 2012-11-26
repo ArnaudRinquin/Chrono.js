@@ -4,19 +4,36 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-coffee');
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.loadNpmTasks('grunt-macreload');
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-jade');
 
   grunt.initConfig({
     clean:{
-      all:["lib","test"]
+      chrono:["lib","test"],
+      demo:['demo/*.*']
     },
     coffeelint:{
-      all:["src/*.coffee", "src/test/*.coffee"]
+      chrono:["src/*.coffee", "src/test/*.coffee"],
+      demo:["demo/src/*.coffee"]
     },
     coffee:{
-      compile:{
+      chrono:{
         files:{
           'lib/*.js':'src/*.coffee',
           'test/*.js':'src/test/*.coffee'
+        }
+      },
+      demo:{
+        files:{
+          'demo/*.js':'src/demo/*.coffee'
+        }
+      }
+    },
+    jade:{
+      demo:{
+        files:{
+          'demo/index.html':'src/demo/*.jade'
         }
       }
     },
@@ -27,27 +44,30 @@ module.exports = function(grunt) {
       }
     },
     simplemocha:{
-      shortTests:{
+      chrono:{
         src:"test/test.js",
         options:{
           reporter: 'spec',
           slow: 200,
           timeout: 1000
         }
-      },
-      longTests:{
-        src:"test/longTest.js",
-        options:{
-          reporter:'spec',
-          slow: 1000000000,
-          timeout: 100000000
-        }
       }
+    },
+    macreload:{
+      chrome:{
+        browser:'chrome',
+        editor:'safari'
+      }
+    },
+    watch:{
+      files:'src/demo/*',
+      tasks:['buildDemo', 'macreload:chrome']
     }
   });
 
-  grunt.registerTask('build', 'clean coffeelint coffee min');
-  grunt.registerTask('all', 'default simplemocha:longTests');
-  grunt.registerTask('default', 'build simplemocha:shortTests');
+  grunt.registerTask('build', 'clean:chrono coffeelint:chrono coffee:chrono min');
+  grunt.registerTask('default', 'build simplemocha:chrono');
+  grunt.registerTask('buildDemo', 'default clean:demo coffeelint:demo coffee:demo jade:demo');
+  grunt.registerTask('watchDemo', 'watch buildDemo');
 
 };
