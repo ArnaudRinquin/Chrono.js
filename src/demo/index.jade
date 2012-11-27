@@ -2,6 +2,7 @@ doctype 5
 html  
   head
     title Chrono.js demo page
+    link(href='./assets/style.css', type='style/css')
   body
     h1 Chrono.js Demo !
     section#mostSimple
@@ -15,9 +16,11 @@ html
             p.start Start
             p.stop Stop
             p.reset Reset
+          .metronome
+            .needle
           p I love the sound of an old clock: 
             span.tictacs
-    script(type='text/javascript', src='./jquery.min.js')
+    script(type='text/javascript', src='./assets/jquery.min.js')
     script(type='text/javascript', src='../lib/chrono.js')
-    script(type='text/javascript', src='./script.js')
+    script(type='text/javascript', src='./assets/script.js')
     

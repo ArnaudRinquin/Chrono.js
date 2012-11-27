@@ -7,15 +7,16 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-macreload');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-jade');
+  grunt.loadNpmTasks('grunt-contrib-less');
 
   grunt.initConfig({
     clean:{
       chrono:["lib","test"],
-      demo:['demo/script.js', 'demo/index.html']
+      demo:['demo/assets/script.js','demo/assets/style.css', 'demo/index.html']
     },
     coffeelint:{
       chrono:["src/*.coffee", "src/test/*.coffee"],
-      demo:["demo/src/*.coffee"]
+      demo:["src/demo/assets/*.coffee"]
     },
     coffee:{
       chrono:{
@@ -26,7 +27,7 @@ module.exports = function(grunt) {
       },
       demo:{
         files:{
-          'demo/*.js':'src/demo/*.coffee'
+          'demo/assets/*.js':'src/demo/assets/*.coffee'
         }
       }
     },
@@ -34,6 +35,13 @@ module.exports = function(grunt) {
       demo:{
         files:{
           'demo/index.html':'src/demo/*.jade'
+        }
+      }
+    },
+    less:{
+      demo:{
+        files:{
+          'demo/assets/style.css':'src/demo/assets/style.less'
         }
       }
     },
@@ -67,7 +75,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('build', 'clean:chrono coffeelint:chrono coffee:chrono min');
   grunt.registerTask('default', 'build simplemocha:chrono');
-  grunt.registerTask('buildDemo', 'default clean:demo coffeelint:demo coffee:demo jade:demo');
+  grunt.registerTask('buildDemo', 'default clean:demo coffeelint:demo coffee:demo less:demo jade:demo');
   grunt.registerTask('watchDemo', 'watch buildDemo');
 
 };
