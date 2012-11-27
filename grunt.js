@@ -11,7 +11,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     clean:{
       chrono:["lib","test"],
-      demo:['demo/*.*']
+      demo:['demo/script.js', 'demo/index.html']
     },
     coffeelint:{
       chrono:["src/*.coffee", "src/test/*.coffee"],
@@ -61,7 +61,7 @@ module.exports = function(grunt) {
     },
     watch:{
       files:'src/demo/*',
-      tasks:['buildDemo', 'macreload:chrome']
+      tasks:['buildDemo']
     }
   });
 

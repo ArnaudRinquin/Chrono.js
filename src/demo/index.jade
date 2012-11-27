@@ -7,5 +7,17 @@ html
     section#mostSimple
       h2 Most Simple example, the ticker
       p Just call the given handler, you may want to try the controls
+      .example
+        .code
+          p var javascript.goes(here);
+        .result
+          .controls
+            p.start Start
+            p.stop Stop
+            p.reset Reset
+          p I love the sound of an old clock: 
+            span.tictacs
+    script(type='text/javascript', src='./jquery.min.js')
     script(type='text/javascript', src='../lib/chrono.js')
     script(type='text/javascript', src='./script.js')
+    
