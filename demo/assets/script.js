@@ -5,44 +5,34 @@ Most simple example
 
 
 (function() {
-  var mostSimpleExample;
+  var metronome;
 
-  mostSimpleExample = function(containerId) {
-    var chrono, container, controls, handler, tictacs;
+  metronome = function(containerId) {
+    var chrono, container, controls, tictacs;
     container = $(containerId);
     tictacs = container.find('.tictacs');
     controls = container.find('.controls');
-    handler = function(ms, chrono) {
-      var html;
-      html = tictacs.html();
-      if (ms !== 0) {
-        html += ',';
-      }
-      html += chrono.time().s % 2 === 0 ? ' tic' : ' tac';
-      return tictacs.html(html);
-    };
+    metronome = container.find('.metronome');
     chrono = new Chrono;
-    chrono.bind(handler);
-    controls.find('.start').bind('click', function(e) {
-      e.preventDefault();
-      return chrono.start();
+    chrono.bind(function() {
+      return metronome.toggleClass('tic');
     });
-    controls.find('.stop').bind('click', function(e) {
-      e.preventDefault();
-      return chrono.stop();
-    });
-    return controls.find('.reset').bind('click', function(e) {
-      e.preventDefault();
-      tictacs.html('');
-      return chrono.reset();
+    return metronome.bind('click', function() {
+      if (chrono.ticking) {
+        return chrono.stop();
+      } else {
+        return chrono.start();
+      }
     });
   };
+
+  window.prettyPrint && prettyPrint();
 
   /*
   Call demos inits
   */
 
 
-  mostSimpleExample('#mostSimple');
+  metronome('#metronome');
 
 }).call(this);

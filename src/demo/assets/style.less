@@ -1,25 +1,70 @@
+.rounded-corners (@radius: 5px) {
+  -webkit-border-radius: @radius;
+  -moz-border-radius: @radius;
+  -ms-border-radius: @radius;
+  -o-border-radius: @radius;
+  border-radius: @radius;
+}
+
+.transition (@target: all, @duration: 0.5s, @animation: ease-out){
+  -webkit-transition: @arguments;
+  -moz-transition: @arguments;
+  -o-transition: @arguments;
+  transition: @arguments;
+}
+
+.rotate (@angle){
+  -webkit-transform: rotate(@angle);
+  -moz-transform: rotate(@angle);
+  -ms-transform: rotate(@angle);
+  -o-transform: rotate(@angle);
+  transform: rotate(@angle);
+}
+
+@angle: 40deg;
 .metronome {
-  @width: 40px;
-  @height: 200px;
+  @width: 30px;
+  @height: 80px;
   @color: #C2C2C2;
   
+  .rounded-corners;
+
   position: relative;
   width: @width;
   height: @height;
-  
+  margin: 10px;
   background-color: @color;
+  border: 1px solid darken(@color, 10%);
   
   .needle {
-    @needleWidth: 3px;
-    @needleHeight: 50px;
+    @needleWidth: 1px;
+    @needleHeight: @height;
+
+    .transition(all, 1s, ease-in-out);
+    .rotate(@angle);
     
     width: @needleWidth;
     height: @needleHeight;
     
     position: absolute;    
-    bottom: 5px;
+    bottom: 0;
     left: (@width - @needleWidth) / 2;
     
-    background-color: red;
+    background-color: darken(@color, 50%);
   }
+
+  .needle:after {
+    position: absolute;
+    content:'';
+    background-color: darken(@color, 50%);
+    width:10px;
+    height:10px;
+    bottom: 0px;
+    left: -5px;
+    .rounded-corners;
+  }
+}
+
+.metronome.tic .needle{
+  .rotate(-@angle);
 }

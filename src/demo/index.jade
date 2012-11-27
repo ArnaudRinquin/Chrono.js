@@ -1,26 +1,52 @@
 doctype 5
 html  
   head
-    title Chrono.js demo page
-    link(href='./assets/style.css', type='style/css')
+    title Chrono.js demos
+    link(href='./assets/style.css', type='text/css', rel='stylesheet')
+    link(href='./assets/bootstrap/css/bootstrap.min.css', type='text/css', rel='stylesheet')
+    link(href='./assets/bootstrap/css/bootstrap-responsive.min.css', type='text/css', rel='stylesheet')
+    link(href='./assets/google-code-prettify/prettify.css', type='text/css', rel='stylesheet')
   body
-    h1 Chrono.js Demo !
-    section#mostSimple
-      h2 Most Simple example, the ticker
-      p Just call the given handler, you may want to try the controls
-      .example
-        .code
-          p var javascript.goes(here);
-        .result
-          .controls
-            p.start Start
-            p.stop Stop
-            p.reset Reset
-          .metronome
-            .needle
-          p I love the sound of an old clock: 
-            span.tictacs
+    .container-fluid
+      .row-fluid
+        .span10.offset2
+          h1 Chrono.js
+          section#tour
+            h3 What's Chrono.js ?
+            p Chrono.js will help you handling some time related tasks such as:
+              ul
+                li Do something every 3,5 seconds for 3 minutes and 24 seconds
+                li Display a chronometer
+                li Display a count down
+                li Start, Stop, Reset the chronometer / timer
+            p
+            | You may think this kind of things are easy to do ? Remember you only have
+            | setTimeout and setInterval to do so.
+          section#metronome
+            h3 The metronome
+            p This example shows Chrono.js defaults settings, start(), stop(), and ticking attribute.
+            .row-fluid
+              .span6
+                pre.prettyprint.linenums.
+                  var chrono = new Chrono();
+                  
+                  chrono.bind(function(){
+                    $('.metronome').toggleClass('tic');}
+                  );
+                  
+                  $('.metronome').bind('click', function(){
+                    if (chrono.ticking) {}
+                      chrono.stop();
+                    } else {
+                      chrono.start();
+                    }
+                  );
+              .span4.well
+                .metronome
+                  .needle
+                p Just click the metronome to start or stop it.
     script(type='text/javascript', src='./assets/jquery.min.js')
+    script(type='text/javascript', src='./assets/google-code-prettify/prettify.js')
     script(type='text/javascript', src='../lib/chrono.js')
     script(type='text/javascript', src='./assets/script.js')
     

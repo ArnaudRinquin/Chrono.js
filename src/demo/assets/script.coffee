@@ -1,36 +1,24 @@
 ###
 Most simple example
 ###
-mostSimpleExample = (containerId)->
+metronome = (containerId)->
   container = $ containerId
   tictacs = container.find '.tictacs'
   controls = container.find '.controls'
-
-  handler = (ms, chrono)->
-    html = tictacs.html()
-    html += ',' unless ms is 0
-    html += if chrono.time().s % 2 is 0 then ' tic' else ' tac'
-    tictacs.html html
+  metronome = container.find '.metronome'
 
   chrono = new Chrono
 
-  chrono.bind handler
+  chrono.bind ()->metronome.toggleClass 'tic'
 
-  controls.find('.start').bind 'click', (e)->
-    e.preventDefault()
-    chrono.start()
+  metronome.bind 'click', ()->
+    if chrono.ticking then chrono.stop()
+    else chrono.start()
 
-  controls.find('.stop').bind 'click', (e)->
-    e.preventDefault()
-    chrono.stop()
-
-  controls.find('.reset').bind 'click', (e)->
-    e.preventDefault()
-    tictacs.html ''
-    chrono.reset()
-
+#Make code pretty
+window.prettyPrint && prettyPrint()
 
 ###
 Call demos inits
 ###
-mostSimpleExample '#mostSimple'
+metronome '#metronome'
