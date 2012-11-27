@@ -47,7 +47,7 @@ class Chrono
   Starts ticking, do nothing if already started
   ###
   start:->
-    return this if @__handlers #handler means it's already stared so do nothing
+    return this if @__handle #handle means it's already stared so do nothing
     @__callHandlers() #call handlers @ start
     # make use of '=>' to ensure the scope
     @__handle = setInterval ((args)=>@__tick args), @settings.precision

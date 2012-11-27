@@ -68,14 +68,21 @@ module.exports = function(grunt) {
       }
     },
     watch:{
-      files:'src/demo/*',
-      tasks:['buildDemo']
+      demo:{
+        files:['src/demo/*', 'src/demo/assets/*'],
+        tasks:['buildDemo']
+      },
+      refresh:{
+        files:['src/demo/*', 'src/demo/assets/*'],
+        tasks:['buildDemo', 'macreload:chrome']
+      }
     }
   });
 
   grunt.registerTask('build', 'clean:chrono coffeelint:chrono coffee:chrono min');
   grunt.registerTask('default', 'build simplemocha:chrono');
   grunt.registerTask('buildDemo', 'default clean:demo coffeelint:demo coffee:demo less:demo jade:demo');
-  grunt.registerTask('watchDemo', 'watch buildDemo');
+  grunt.registerTask('watchDemo', 'watch:demo');
+  grunt.registerTask('watchAndRefresh', 'watch:refresh');
 
 };
