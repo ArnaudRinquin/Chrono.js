@@ -1,0 +1,25 @@
+.metronome {
+  @width: 40px;
+  @height: 200px;
+  @color: #C2C2C2;
+  
+  position: relative;
+  width: @width;
+  height: @height;
+  
+  background-color: @color;
+  
+  .needle {
+    @needleWidth: 3px;
+    @needleHeight: 50px;
+    
+    width: @needleWidth;
+    height: @needleHeight;
+    
+    position: absolute;    
+    bottom: 5px;
+    left: (@width - @needleWidth) / 2;
+    
+    background-color: red;
+  }
+}
