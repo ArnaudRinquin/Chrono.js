@@ -26,7 +26,7 @@
             setTimeout and setInterval to do so.
           </section>
           <section id="metronome">
-            <h3>The metronome</h3>
+            <h3>Simpliest possible example : The metronome</h3>
             <p>This example shows Chrono.js defaults settings, start(), stop(), and ticking attribute.</p>
             <div class="row-fluid">
               <div class="span6">
@@ -37,12 +37,12 @@ chrono.bind(function(){
 );
 
 $('.metronome').bind('click', function(){
-  if (chrono.ticking) {}
+  if (chrono.ticking) {
     chrono.stop();
   } else {
     chrono.start();
   }
-);</pre>
+});</pre>
               </div>
               <div class="span4 well">
                 <div class="metronome">
@@ -51,6 +51,49 @@ $('.metronome').bind('click', function(){
                 <p>Just click the metronome to start or stop it.</p>
               </div>
             </div>
+            <section id="chronometer">
+              <h3>Textual chronometer</h3>
+              <p>We will set a higher precision and use the information given at each tick</p>
+              <div class="row-fluid">
+                <div class="span6">
+                  <pre class="prettyprint linenums">var chrono = new Chrono({
+  precision: 100
+});
+
+chrono.bind(function(time, chrono){
+  var time = chrono.time();
+  
+  var addZero = function(number){
+    return (number &gt; 9 ? '' : '0') + number;
+  };
+  
+  $('.m').html(addZero(time.m));
+  $('.s').html(addZero(time.s));
+  $('.ms').html(addZero(parseInt(time.ms/10)));
+});
+
+// Controls
+$('.start').bind('click', function(){
+  chrono.start();
+});
+
+$('.stop').bind('click', function(){
+  chrono.stop();
+});
+
+$('.start').bind('click', function(){
+  chrono.reset();
+  $('.m').html('00');
+  $('.s').html('00');
+  $('.ms').html('00');
+});
+</pre>
+                </div>
+                <div class="span4 well">
+                  <p class="chronometer"><span class="m">00</span><span>:</span><span class="s">00</span><span>:</span><span class="ms">00</span><span class="start"><i class="icon-play"></i></span><span class="stop"><i class="icon-stop"></i></span><span class="reset"><i class="icon-refresh"></i></span></p>
+                </div>
+              </div>
+            </section>
           </section>
         </div>
       </div>

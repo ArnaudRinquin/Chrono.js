@@ -23,7 +23,7 @@ html
             | You may think this kind of things are easy to do ? Remember you only have
             | setTimeout and setInterval to do so.
           section#metronome
-            h3 The metronome
+            h3 Simpliest possible example : The metronome
             p This example shows Chrono.js defaults settings, start(), stop(), and ticking attribute.
             .row-fluid
               .span6
@@ -35,16 +35,69 @@ html
                   );
                   
                   $('.metronome').bind('click', function(){
-                    if (chrono.ticking) {}
+                    if (chrono.ticking) {
                       chrono.stop();
                     } else {
                       chrono.start();
                     }
-                  );
+                  });
               .span4.well
                 .metronome
                   .needle
                 p Just click the metronome to start or stop it.
+
+            section#chronometer
+              h3 Textual chronometer
+              p We will set a higher precision and use the information given at each tick
+              .row-fluid
+                .span6
+                  pre.prettyprint.linenums.
+                    var chrono = new Chrono({
+                      precision: 100
+                    });
+
+                    chrono.bind(function(time, chrono){
+                      var time = chrono.time();
+                      
+                      var addZero = function(number){
+                        return (number > 9 ? '' : '0') + number;
+                      };
+
+                      $('.m').html(addZero(time.m));
+                      $('.s').html(addZero(time.s));
+                      $('.ms').html(addZero(parseInt(time.ms/10)));
+                    });
+
+                    // Controls
+                    $('.start').bind('click', function(){
+                      chrono.start();
+                    });
+
+                    $('.stop').bind('click', function(){
+                      chrono.stop();
+                    });
+
+                    $('.start').bind('click', function(){
+                      chrono.reset();
+                      $('.m').html('00');
+                      $('.s').html('00');
+                      $('.ms').html('00');
+                    });
+
+                .span4.well
+                  p.chronometer
+                    span.m 00
+                    span :
+                    span.s 00
+                    span :
+                    span.ms 00
+                    span.start
+                      i.icon-play
+                    span.stop
+                      i.icon-stop
+                    span.reset
+                      i.icon-refresh
+
     script(type='text/javascript', src='./assets/jquery.min.js')
     script(type='text/javascript', src='./assets/google-code-prettify/prettify.js')
     script(type='text/javascript', src='../lib/chrono.js')
