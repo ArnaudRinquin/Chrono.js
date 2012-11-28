@@ -2,7 +2,9 @@ chai = require 'chai'
 chai.should()
 expect = chai.expect
 
-Chrono = (require '../lib/chrono').Chrono
+ChronoJS = (require '../lib/chrono')
+Chrono = ChronoJS.Chrono
+Timer = ChronoJS.Timer
 
 describe 'Chrono', ->
   describe 'Constructor', ->
@@ -158,22 +160,21 @@ describe 'Chrono', ->
 
     it 'start, stop, reset can be chained (returning the chrono)', ->
       c.start().stop().reset().should.equal c
-  
+
   describe 'Handlers', ->
     it 'are called at t+0', (done) ->
       callDoneAndStopHandler = (time, chrono) ->
-        c.ticking.should.be.false
-        if time is 0
-          done()
-        else
-          throw new Error 'time is not 0'
+        time.should.equal 0
+        chrono.stop()
+        done()
       
       c = new Chrono {precision:100}, callDoneAndStopHandler
-      c.start().stop()
+      c.start()
 
     it 'are all called', (done)->
       callbacksCalled = 0
       callback = (time, chrono)->
+        console.log 'handlers:', time
         callbacksCalled++
         if callbacksCalled is 4
           chrono.stop()
@@ -181,7 +182,7 @@ describe 'Chrono', ->
         if time > 0
           done new Error 'not all handlers were called'
       c = new Chrono({precision:100}, callback, callback, callback, callback)
-      c.start().stop()
+      c.start()
 
   describe 'to and keepGoing', ->
     it 'triggers to flag on events', (done)->

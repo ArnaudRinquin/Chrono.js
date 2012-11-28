@@ -1,5 +1,5 @@
 (function() {
-  var Chrono, chai, expect;
+  var Chrono, ChronoJS, Timer, chai, expect;
 
   chai = require('chai');
 
@@ -7,7 +7,11 @@
 
   expect = chai.expect;
 
-  Chrono = (require('../lib/chrono')).Chrono;
+  ChronoJS = require('../lib/chrono');
+
+  Chrono = ChronoJS.Chrono;
+
+  Timer = ChronoJS.Timer;
 
   describe('Chrono', function() {
     describe('Constructor', function() {
@@ -230,22 +234,20 @@
       it('are called at t+0', function(done) {
         var c, callDoneAndStopHandler;
         callDoneAndStopHandler = function(time, chrono) {
-          c.ticking.should.be["false"];
-          if (time === 0) {
-            return done();
-          } else {
-            throw new Error('time is not 0');
-          }
+          time.should.equal(0);
+          chrono.stop();
+          return done();
         };
         c = new Chrono({
           precision: 100
         }, callDoneAndStopHandler);
-        return c.start().stop();
+        return c.start();
       });
       return it('are all called', function(done) {
         var c, callback, callbacksCalled;
         callbacksCalled = 0;
         callback = function(time, chrono) {
+          console.log('handlers:', time);
           callbacksCalled++;
           if (callbacksCalled === 4) {
             chrono.stop();
@@ -258,7 +260,7 @@
         c = new Chrono({
           precision: 100
         }, callback, callback, callback, callback);
-        return c.start().stop();
+        return c.start();
       });
     });
     describe('to and keepGoing', function() {

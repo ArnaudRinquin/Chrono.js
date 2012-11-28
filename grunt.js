@@ -59,6 +59,14 @@ module.exports = function(grunt) {
           slow: 200,
           timeout: 1000
         }
+      },
+      long:{
+        src:"test/long.js",
+        options:{
+          reporter:'spec',
+          slow: 1000000000,
+          timeout: 100000000
+        }
       }
     },
     macreload:{
@@ -77,5 +85,6 @@ module.exports = function(grunt) {
   grunt.registerTask('default', 'build simplemocha:chrono');
   grunt.registerTask('buildDemo', 'default clean:demo coffeelint:demo coffee:demo less:demo jade:demo');
   grunt.registerTask('watchDemo', 'watch buildDemo');
+  grunt.registerTask('longtest', 'build simplemocha:long');
 
 };

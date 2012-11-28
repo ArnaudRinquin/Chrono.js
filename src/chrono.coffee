@@ -41,17 +41,21 @@ class Chrono
       settings.to = @toMilliseconds settings.to
 
     @settings = extend defaults, settings
+    
+    @__timer = new Timer @settings.precision, ()=>@__tick()
+    
     @reset()
+    
+    this
   
   ###
   Starts ticking, do nothing if already started
   ###
   start:->
-    return this if @__handlers #handler means it's already stared so do nothing
-    @__callHandlers() #call handlers @ start
-    # make use of '=>' to ensure the scope
-    @__handle = setInterval ((args)=>@__tick args), @settings.precision
+    return this if @ticking
     @ticking = true
+    @__timer.start()
+    @__callHandlers()
     this
 
   ###
@@ -59,8 +63,7 @@ class Chrono
   Don't use it as a toggle function, no effect if already paused
   ###
   stop:->
-    clearInterval @__handle if @__handle
-    @__handle = null
+    @__timer.stop()
     @ticking = false
     this
 
@@ -123,7 +126,7 @@ class Chrono
   Compute elapsed time, minute and seconds attributes (unless optimized)
   ###
   __tick:->
-    @__ms+= @settings.precision
+    @__ms += @settings.precision
     @stop() if (not @settings.keepGoing) and @__ms >= @settings.to
     @__callHandlers()
     this
@@ -230,6 +233,39 @@ extend = (object, properties)->
   for key, val of properties
     object[key] = val
   object
+  
+###
+Precise timer based on https://gist.github.com/1185904
+###
+class Timer
+  constructor:(@precision = 1000, @callback)->
+    @started = false
+    this
+
+  start:()->
+    return this if @__handle
+    @started = true
+    @__baseline = new Date().getTime()
+    @__setTimeout()
+    this
+
+  stop:()->
+    @started = false
+    clearTimeout @__handle
+    @__handle = undefined
+    this
+    
+  __setTimeout:()->
+    now = new Date().getTime()
+    nextTimeout = @precision - now + @__baseline
+    nextTimeout = 0 if nextTimeout < 0
+    
+    cb = ()=>
+      @__setTimeout()
+      @callback()
+    
+    @__handle = setTimeout cb, nextTimeout
+    @__baseline += @precision
 
 ###
 Class covering the native Date functions I used to use. Same signatures except
@@ -275,3 +311,4 @@ class Duration
 # Module exportation
 root = exports ? this
 root.Chrono = Chrono
+root.Timer = Timer
