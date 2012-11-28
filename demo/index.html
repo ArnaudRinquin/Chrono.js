@@ -1,1 +1,106 @@
-<!DOCTYPE html><html> <head><title>Chrono.js demo page</title><link href="./assets/style.css" type="style/css"></head><body><h1>Chrono.js Demo !</h1><section id="mostSimple"><h2>Most Simple example, the ticker</h2><p>Just call the given handler, you may want to try the controls</p><div class="example"><div class="code"><p>var javascript.goes(here);</p></div><div class="result"><div class="controls"><p class="start">Start</p><p class="stop">Stop</p><p class="reset">Reset</p></div><div class="metronome"><div class="needle"></div></div><p>I love the sound of an old clock: <span class="tictacs"></span></p></div></div></section><script type="text/javascript" src="./assets/jquery.min.js"></script><script type="text/javascript" src="../lib/chrono.js"></script><script type="text/javascript" src="./assets/script.js"></script></body></html>
+<!DOCTYPE html>
+<html> 
+  <head>
+    <title>Chrono.js demos</title>
+    <link href="./assets/style.css" type="text/css" rel="stylesheet">
+    <link href="./assets/bootstrap/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="./assets/bootstrap/css/bootstrap-responsive.min.css" type="text/css" rel="stylesheet">
+    <link href="./assets/google-code-prettify/prettify.css" type="text/css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span10 offset2">
+          <h1>Chrono.js</h1>
+          <section id="tour">
+            <h3>What's Chrono.js ?</h3>
+            <p>Chrono.js will help you handling some time related tasks such as:
+              <ul>
+                <li>Do something every 3,5 seconds for 3 minutes and 24 seconds</li>
+                <li>Display a chronometer</li>
+                <li>Display a count down</li>
+                <li>Start, Stop, Reset the chronometer / timer</li>
+              </ul>
+            </p>
+            <p></p>You may think this kind of things are easy to do ? Remember you only have
+            setTimeout and setInterval to do so.
+          </section>
+          <section id="metronome">
+            <h3>Simpliest possible example : The metronome</h3>
+            <p>This example shows Chrono.js defaults settings, start(), stop(), and ticking attribute.</p>
+            <div class="row-fluid">
+              <div class="span6">
+                <pre class="prettyprint linenums">var chrono = new Chrono();
+
+chrono.bind(function(){
+  $('.metronome').toggleClass('tic');}
+);
+
+$('.metronome').bind('click', function(){
+  if (chrono.ticking) {
+    chrono.stop();
+  } else {
+    chrono.start();
+  }
+});</pre>
+              </div>
+              <div class="span4 well">
+                <div class="metronome">
+                  <div class="needle"></div>
+                </div>
+                <p>Just click the metronome to start or stop it.</p>
+              </div>
+            </div>
+            <section id="chronometer">
+              <h3>Textual chronometer</h3>
+              <p>We will set a higher precision and use the information given at each tick</p>
+              <div class="row-fluid">
+                <div class="span6">
+                  <pre class="prettyprint linenums">var chrono = new Chrono({
+  precision: 100
+});
+
+chrono.bind(function(time, chrono){
+  var time = chrono.time();
+  
+  var addZero = function(number){
+    return (number &gt; 9 ? '' : '0') + number;
+  };
+  
+  $('.m').html(addZero(time.m));
+  $('.s').html(addZero(time.s));
+  $('.ms').html(addZero(parseInt(time.ms/10)));
+});
+
+// Controls
+$('.start').bind('click', function(){
+  chrono.start();
+});
+
+$('.stop').bind('click', function(){
+  chrono.stop();
+});
+
+$('.start').bind('click', function(){
+  chrono.reset();
+  $('.m').html('00');
+  $('.s').html('00');
+  $('.ms').html('00');
+});
+</pre>
+                </div>
+                <div class="span4 well">
+                  <p class="chronometer"><span class="m">00</span><span>:</span><span class="s">00</span><span>:</span><span class="ms">00</span><span class="start"><i class="icon-play"></i></span><span class="stop"><i class="icon-stop"></i></span><span class="reset"><i class="icon-refresh"></i></span></p>
+                </div>
+              </div>
+            </section>
+          </section>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="./assets/jquery.min.js"></script>
+    <script type="text/javascript" src="./assets/google-code-prettify/prettify.js"></script>
+    <script type="text/javascript" src="../lib/chrono.js"></script>
+    <script type="text/javascript" src="./assets/script.js"></script>
+  </body>
+</html>

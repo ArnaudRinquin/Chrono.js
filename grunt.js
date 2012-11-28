@@ -35,6 +35,9 @@ module.exports = function(grunt) {
       demo:{
         files:{
           'demo/index.html':'src/demo/*.jade'
+        },
+        options:{
+          pretty: true
         }
       }
     },
@@ -76,8 +79,14 @@ module.exports = function(grunt) {
       }
     },
     watch:{
-      files:'src/demo/*',
-      tasks:['buildDemo']
+      demo:{
+        files:['src/demo/*', 'src/demo/assets/*'],
+        tasks:['buildDemo']
+      },
+      refresh:{
+        files:['src/demo/*', 'src/demo/assets/*'],
+        tasks:['buildDemo', 'macreload:chrome']
+      }
     }
   });
 

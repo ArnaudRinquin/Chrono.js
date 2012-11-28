@@ -1,36 +1,53 @@
 ###
 Most simple example
 ###
-mostSimpleExample = (containerId)->
+metronome = (containerId)->
   container = $ containerId
   tictacs = container.find '.tictacs'
   controls = container.find '.controls'
-
-  handler = (ms, chrono)->
-    html = tictacs.html()
-    html += ',' unless ms is 0
-    html += if chrono.time().s % 2 is 0 then ' tic' else ' tac'
-    tictacs.html html
+  metronome = container.find '.metronome'
 
   chrono = new Chrono
 
-  chrono.bind handler
+  chrono.bind ()->metronome.toggleClass 'tic'
 
-  controls.find('.start').bind 'click', (e)->
-    e.preventDefault()
-    chrono.start()
+  metronome.bind 'click', ()->
+    if chrono.ticking then chrono.stop()
+    else chrono.start()
 
-  controls.find('.stop').bind 'click', (e)->
-    e.preventDefault()
-    chrono.stop()
+chronometer = (containerId)->
+  container = $ containerId
+  m = container.find '.m'
+  s = container.find '.s'
+  ms = container.find '.ms'
+  start = container.find '.start'
+  stop = container.find '.stop'
+  reset = container.find '.reset'
+  
+  chrono = new Chrono precision:100
 
-  controls.find('.reset').bind 'click', (e)->
-    e.preventDefault()
-    tictacs.html ''
+  addZero = (number)-> if number > 9 then number else '0' + number
+
+  chrono.bind ()->
+    time = chrono.time()
+    m.html addZero(time.m)
+    s.html addZero(time.s)
+    ms.html addZero(parseInt(time.ms/10))
+
+  start.bind 'click', ()-> chrono.start()
+  stop.bind 'click', ()-> chrono.stop()
+  reset.bind 'click', ()->
     chrono.reset()
+    m.html '00'
+    s.html '00'
+    ms.html '00'
 
+
+#Make code pretty
+window.prettyPrint && prettyPrint()
 
 ###
 Call demos inits
 ###
-mostSimpleExample '#mostSimple'
+metronome '#metronome'
+chronometer '#chronometer'
