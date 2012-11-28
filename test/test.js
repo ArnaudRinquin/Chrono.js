@@ -247,7 +247,6 @@
         var c, callback, callbacksCalled;
         callbacksCalled = 0;
         callback = function(time, chrono) {
-          console.log('handlers:', time);
           callbacksCalled++;
           if (callbacksCalled === 4) {
             chrono.stop();

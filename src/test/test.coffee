@@ -174,7 +174,6 @@ describe 'Chrono', ->
     it 'are all called', (done)->
       callbacksCalled = 0
       callback = (time, chrono)->
-        console.log 'handlers:', time
         callbacksCalled++
         if callbacksCalled is 4
           chrono.stop()
