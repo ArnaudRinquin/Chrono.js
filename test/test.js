@@ -55,35 +55,27 @@
           return c.settings.precision.should.equal(1010);
         });
       });
-      describe('can be created with specific maximum value (to)', function() {
-        it('as an integer (milliseconds)', function() {
-          var c;
-          c = new Chrono({
+      /* Removed from scope for now will be implemented in another way
+      describe 'can be created with specific maximum value (to)', ->
+        it 'as an integer (milliseconds)', ->
+          c = new Chrono
             precision: 100,
             to: 50
-          });
-          return c.settings.to.should.equal(50);
-        });
-        it('or as an object', function() {
-          var c;
-          c = new Chrono({
+          c.settings.to.should.equal 50
+      
+        it 'or as an object', ->
+          c = new Chrono
             precision: 100,
-            to: {
-              ms: 50,
-              s: 3
-            }
-          });
-          return c.settings.to.should.equal(3050);
-        });
-        return it('or as string', function() {
-          var c;
-          c = new Chrono({
+            to: {ms:50, s:3}
+          c.settings.to.should.equal 3050
+      
+        it 'or as string', ->
+          c = new Chrono
             precision: 100,
             to: '2min 3sec 10ms'
-          });
-          return c.settings.to.should.equal(123010);
-        });
-      });
+          c.settings.to.should.equal 123010
+      */
+
       describe('can be created with specific initial value (from)', function() {
         it('as an integer (milliseconds)', function() {
           var c;
@@ -231,10 +223,11 @@
       });
     });
     describe('Handlers', function() {
-      it('are called at t+0', function(done) {
+      it('are called at t+0 with a -start- flag', function(done) {
         var c, callDoneAndStopHandler;
-        callDoneAndStopHandler = function(time, chrono) {
+        callDoneAndStopHandler = function(time, chrono, flag) {
           time.should.equal(0);
+          flag.should.equal('start');
           chrono.stop();
           return done();
         };
@@ -243,10 +236,10 @@
         }, callDoneAndStopHandler);
         return c.start();
       });
-      return it('are all called', function(done) {
+      it('are all called', function(done) {
         var c, callback, callbacksCalled;
         callbacksCalled = 0;
-        callback = function(time, chrono) {
+        callback = function(time, chrono, flag) {
           callbacksCalled++;
           if (callbacksCalled === 4) {
             chrono.stop();
@@ -261,57 +254,64 @@
         }, callback, callback, callback, callback);
         return c.start();
       });
-    });
-    describe('to and keepGoing', function() {
-      it('triggers to flag on events', function(done) {
-        var c, s;
-        s = {
-          precision: 10,
-          to: 30
-        };
-        c = new Chrono(s, function(time, chrono, toReached) {
-          if (time === 30) {
-            expect(toReached).to.be["true"];
-            c.stop();
-            return done();
+      return it('normal ticks have the -tick- flag', function(done) {
+        var c, callback, callbackCalledOnce;
+        callbackCalledOnce = false;
+        callback = function(time, chrono, flag) {
+          if (callbackCalledOnce) {
+            flag.should.equal('tick');
+            chrono.stop();
+            done();
           }
-        });
+          return callbackCalledOnce = true;
+        };
+        c = new Chrono({
+          precision: 100
+        }, callback);
         return c.start();
       });
-      it('keep ticking if keepGoing is set true', function(done) {
-        var c, s;
-        s = {
-          precision: 10,
+    });
+    /* Removed from scope for now, will be implemented in another way
+    describe 'to and keepGoing', ->
+      it 'triggers to flag on events', (done)->
+        s =
+          precision:10,
+          to: 30
+    
+        c = new Chrono s, (time, chrono, toReached)->
+          if time is 30
+            expect(toReached).to.be.true
+            c.stop()
+            done()
+        c.start()
+    
+      it 'keep ticking if keepGoing is set true', (done)->
+        s =
+          precision:10,
           to: 50,
           keepGoing: true
-        };
-        c = new Chrono(s, function(time, chrono, toReached) {
-          if (time === 50) {
-            c.ticking.should.be["true"];
-            toReached.should.be["true"];
-          }
-          if (time === 60) {
-            c.stop();
-            return done();
-          }
-        });
-        return c.start();
-      });
-      return it('stops at to if keepGoing is not specified', function(done) {
-        var c, s;
-        s = {
-          precision: 10,
+    
+        c = new Chrono s, (time, chrono, toReached)->
+          if time is 50
+            c.ticking.should.be.true
+            toReached.should.be.true
+          if time is 60
+            c.stop()
+            done()
+        c.start()
+    
+      it 'stops at to if keepGoing is not specified', (done)->
+        s =
+          precision:10,
           to: 50
-        };
-        c = new Chrono(s, function(time, chrono, toReached) {
-          if (time === 50) {
-            c.ticking.should.be["false"];
-            return done();
-          }
-        });
-        return c.start();
-      });
-    });
+    
+        c = new Chrono s, (time, chrono, toReached)->
+          if time is 50
+            c.ticking.should.be.false
+            done()
+        c.start()
+    */
+
     return describe('time', function() {
       describe('returns a correct time object', function() {
         it('at t+0', function() {

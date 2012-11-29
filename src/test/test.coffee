@@ -34,6 +34,7 @@ describe 'Chrono', ->
         c.should.be.ok
         c.settings.precision.should.equal 1010
 
+    ### Removed from scope for now will be implemented in another way
     describe 'can be created with specific maximum value (to)', ->
       it 'as an integer (milliseconds)', ->
         c = new Chrono
@@ -52,7 +53,7 @@ describe 'Chrono', ->
           precision: 100,
           to: '2min 3sec 10ms'
         c.settings.to.should.equal 123010
-
+    ###
     describe 'can be created with specific initial value (from)', ->
       it 'as an integer (milliseconds)', ->
         c = new Chrono
@@ -162,9 +163,10 @@ describe 'Chrono', ->
       c.start().stop().reset().should.equal c
 
   describe 'Handlers', ->
-    it 'are called at t+0', (done) ->
-      callDoneAndStopHandler = (time, chrono) ->
+    it 'are called at t+0 with a -start- flag', (done) ->
+      callDoneAndStopHandler = (time, chrono, flag) ->
         time.should.equal 0
+        flag.should.equal 'start'
         chrono.stop()
         done()
       
@@ -173,7 +175,7 @@ describe 'Chrono', ->
 
     it 'are all called', (done)->
       callbacksCalled = 0
-      callback = (time, chrono)->
+      callback = (time, chrono, flag)->
         callbacksCalled++
         if callbacksCalled is 4
           chrono.stop()
@@ -183,6 +185,19 @@ describe 'Chrono', ->
       c = new Chrono({precision:100}, callback, callback, callback, callback)
       c.start()
 
+    it 'normal ticks have the -tick- flag', (done)->
+      callbackCalledOnce = false
+      callback = (time, chrono, flag)->
+        if callbackCalledOnce
+          flag.should.equal 'tick'
+          chrono.stop()
+          done()
+        callbackCalledOnce = true
+        
+      c = new Chrono({precision:100}, callback)
+      c.start()
+
+  ### Removed from scope for now, will be implemented in another way
   describe 'to and keepGoing', ->
     it 'triggers to flag on events', (done)->
       s =
@@ -221,6 +236,7 @@ describe 'Chrono', ->
           c.ticking.should.be.false
           done()
       c.start()
+  ###
 
   describe 'time', ->
     describe 'returns a correct time object', ->

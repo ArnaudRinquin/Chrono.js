@@ -28,8 +28,7 @@ class Chrono
 
     defaults = {
       precision: 1000,
-      from: 0,
-      to: undefined,
+      from: 0
       keepGoing: false
     }
 
@@ -41,9 +40,7 @@ class Chrono
       settings.to = @toMilliseconds settings.to
 
     @settings = extend defaults, settings
-    
-    @__timer = new Timer @settings.precision, ()=>@__tick()
-    
+
     @reset()
     
     this
@@ -55,7 +52,7 @@ class Chrono
     return this if @ticking
     @ticking = true
     @__timer.start()
-    @__callHandlers()
+    @__callHandlers 'start'
     this
 
   ###
@@ -71,6 +68,7 @@ class Chrono
   Reset will pause the time and set the time to 0 or given time
   ###
   reset:(@__ms = @settings.from)->
+    @__timer = new Timer @settings.precision, ()=>@__tick()
     @__ms = @toMilliseconds @__ms
     @stop()
     this
@@ -128,14 +126,14 @@ class Chrono
   __tick:->
     @__ms += @settings.precision
     @stop() if (not @settings.keepGoing) and @__ms >= @settings.to
-    @__callHandlers()
+    @__callHandlers 'tick'
     this
 
   ###
   Just call handlers with current time in ms, this chrono, to is reached flag
   ###
-  __callHandlers:->
-    h @__ms, this, @__ms >= @settings.to for h in @handlers
+  __callHandlers:(flag)->
+    h @__ms, this, flag for h in @handlers
     this
 
   __applyDateChanges:(date, changes)->
