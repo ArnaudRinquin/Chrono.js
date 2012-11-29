@@ -16,6 +16,7 @@
             <h3>What's Chrono.js ?</h3>
             <p>Chrono.js will help you handling some time related tasks such as:
               <ul>
+                <li>Try to handle time precisly (setTimeout and setInterval are not)</li>
                 <li>Do something every 3,5 seconds for 3 minutes and 24 seconds</li>
                 <li>Display a chronometer</li>
                 <li>Display a count down</li>
@@ -45,7 +46,7 @@ $('.metronome').bind('click', function(){
 });</pre>
               </div>
               <div class="span4 well">
-                <div class="metronome">
+                <div class="metronome stopped">
                   <div class="needle"></div>
                 </div>
                 <p>Just click the metronome to start or stop it.</p>
@@ -57,7 +58,7 @@ $('.metronome').bind('click', function(){
               <div class="row-fluid">
                 <div class="span6">
                   <pre class="prettyprint linenums">var chrono = new Chrono({
-  precision: 100
+  precision: 10
 });
 
 chrono.bind(function(time, chrono){
@@ -91,6 +92,8 @@ $('.start').bind('click', function(){
                 </div>
                 <div class="span4 well">
                   <p class="chronometer"><span class="m">00</span><span>:</span><span class="s">00</span><span>:</span><span class="ms">00</span><span class="start"><i class="icon-play"></i></span><span class="stop"><i class="icon-stop"></i></span><span class="reset"><i class="icon-refresh"></i></span></p>
+                  <p>Enjoy this very simple chronometer !</p>
+                  <p>Don't hesitate to check its precision againt a real one :)</p>
                 </div>
               </div>
             </section>

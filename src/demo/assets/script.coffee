@@ -9,7 +9,13 @@ metronome = (containerId)->
 
   chrono = new Chrono
 
-  chrono.bind ()->metronome.toggleClass 'tic'
+  handler = (ms, chrono, flag)->
+    switch(flag)
+      when 'start' then metronome.removeClass 'stopped'
+      when 'stop' then metronome.addClass 'stopped'
+      when 'tick' then metronome.toggleClass 'tick'
+  
+  chrono.bind handler
 
   metronome.bind 'click', ()->
     if chrono.ticking then chrono.stop()
@@ -24,7 +30,7 @@ chronometer = (containerId)->
   stop = container.find '.stop'
   reset = container.find '.reset'
   
-  chrono = new Chrono precision:100
+  chrono = new Chrono precision:10
 
   addZero = (number)-> if number > 9 then number else '0' + number
 

@@ -15,6 +15,7 @@ html
             h3 What's Chrono.js ?
             p Chrono.js will help you handling some time related tasks such as:
               ul
+                li Try to handle time precisly (setTimeout and setInterval are not)
                 li Do something every 3,5 seconds for 3 minutes and 24 seconds
                 li Display a chronometer
                 li Display a count down
@@ -42,7 +43,7 @@ html
                     }
                   });
               .span4.well
-                .metronome
+                .metronome.stopped
                   .needle
                 p Just click the metronome to start or stop it.
 
@@ -53,7 +54,7 @@ html
                 .span6
                   pre.prettyprint.linenums.
                     var chrono = new Chrono({
-                      precision: 100
+                      precision: 10
                     });
 
                     chrono.bind(function(time, chrono){
@@ -97,6 +98,8 @@ html
                       i.icon-stop
                     span.reset
                       i.icon-refresh
+                  p Enjoy this very simple chronometer !
+                  p Don't hesitate to check its precision againt a real one :)
 
     script(type='text/javascript', src='./assets/jquery.min.js')
     script(type='text/javascript', src='./assets/google-code-prettify/prettify.js')

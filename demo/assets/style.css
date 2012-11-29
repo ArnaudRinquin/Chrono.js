@@ -28,7 +28,7 @@
   left: 14.5px;
   background-color: #424242;
 }
-.metronome .needle:after {
+.metronome .needle::after {
   position: absolute;
   content: '';
   background-color: #424242;
@@ -42,10 +42,17 @@
   -o-border-radius: 5px;
   border-radius: 5px;
 }
-.metronome.tic .needle {
+.metronome.tick .needle {
   -webkit-transform: rotate(-40deg);
   -moz-transform: rotate(-40deg);
   -ms-transform: rotate(-40deg);
   -o-transform: rotate(-40deg);
   transform: rotate(-40deg);
+}
+.metronome.stopped .needle {
+  -webkit-transform: rotate(0);
+  -moz-transform: rotate(0);
+  -ms-transform: rotate(0);
+  -o-transform: rotate(0);
+  transform: rotate(0);
 }

@@ -8,15 +8,23 @@ Most simple example
   var chronometer, metronome;
 
   metronome = function(containerId) {
-    var chrono, container, controls, tictacs;
+    var chrono, container, controls, handler, tictacs;
     container = $(containerId);
     tictacs = container.find('.tictacs');
     controls = container.find('.controls');
     metronome = container.find('.metronome');
     chrono = new Chrono;
-    chrono.bind(function() {
-      return metronome.toggleClass('tic');
-    });
+    handler = function(ms, chrono, flag) {
+      switch (flag) {
+        case 'start':
+          return metronome.removeClass('stopped');
+        case 'stop':
+          return metronome.addClass('stopped');
+        case 'tick':
+          return metronome.toggleClass('tick');
+      }
+    };
+    chrono.bind(handler);
     return metronome.bind('click', function() {
       if (chrono.ticking) {
         return chrono.stop();
@@ -36,7 +44,7 @@ Most simple example
     stop = container.find('.stop');
     reset = container.find('.reset');
     chrono = new Chrono({
-      precision: 100
+      precision: 10
     });
     addZero = function(number) {
       if (number > 9) {

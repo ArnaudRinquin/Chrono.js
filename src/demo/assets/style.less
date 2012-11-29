@@ -51,20 +51,24 @@
     left: (@width - @needleWidth) / 2;
     
     background-color: darken(@color, 50%);
+
+    &::after {
+      position: absolute;
+      content:'';
+      background-color: darken(@color, 50%);
+      width:10px;
+      height:10px;
+      bottom: 0px;
+      left: -5px;
+      .rounded-corners;
+    }
   }
 
-  .needle:after {
-    position: absolute;
-    content:'';
-    background-color: darken(@color, 50%);
-    width:10px;
-    height:10px;
-    bottom: 0px;
-    left: -5px;
-    .rounded-corners;
+  &.tick .needle {
+    .rotate(-@angle);  
   }
-}
 
-.metronome.tic .needle{
-  .rotate(-@angle);
+  &.stopped .needle {
+    .rotate(0);
+  }
 }
