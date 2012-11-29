@@ -15,8 +15,7 @@ describe 'Chrono', ->
       c = new Chrono()
       c.should.be.ok
       c.settings.precision.should.equal 1000
-      expect(c.settings.to).to.not.exist
-      c.settings.keepGoing.should.be.false
+      c.settings.startFrom.should.equal 0
 
     describe 'can be created with specific precision', ->
       it 'as an integer (milliseconds)', ->
@@ -54,38 +53,24 @@ describe 'Chrono', ->
           to: '2min 3sec 10ms'
         c.settings.to.should.equal 123010
     ###
-    describe 'can be created with specific initial value (from)', ->
+    describe 'can be created with specific initial value (startFrom)', ->
       it 'as an integer (milliseconds)', ->
         c = new Chrono
           precision: 100,
-          from: 50
-        c.settings.from.should.equal 50
+          startFrom: 50
+        c.settings.startFrom.should.equal 50
 
       it 'or as an object', ->
         c = new Chrono
           precision: 100,
-          from: {ms:50, s:3}
-        c.settings.from.should.equal 3050
+          startFrom: {ms:50, s:3}
+        c.settings.startFrom.should.equal 3050
 
       it 'or as string', ->
         c = new Chrono
           precision: 100,
-          from: '2min 3sec 10ms'
-        c.settings.from.should.equal 123010
-
-    it 'can be created with keepGoing set to true', ->
-      c = new Chrono
-        precision: 100,
-        to: 50,
-        keepGoing: true
-      c.settings.keepGoing.should.be.true
-
-    it 'allows to directly pass precision as a single setting', ->
-      c = new Chrono 10000
-      c.settings.precision.should.equal 10000
-
-      c = new Chrono '15s'
-      c.settings.precision.should.equal 15000
+          startFrom: '2min 3sec 10ms'
+        c.settings.startFrom.should.equal 123010
 
     it 'with one handler', ->
       handler = (ticks, chrono) -> this
@@ -132,7 +117,7 @@ describe 'Chrono', ->
       c.handlers.should.not.contain handler2
 
   describe 'Controls', ->
-    c = new Chrono from:50
+    c = new Chrono startFrom:50
     it 'start', ->
       c.should.respondTo 'start'
       c.start().ticking.should.be.true
@@ -145,16 +130,13 @@ describe 'Chrono', ->
       it 'stops the ticking', ->
         c.start().reset().ticking.should.be.false
       
-      it 'and set time to settings.from', ->
-        c.time().t.should.equal c.settings.from
+      it 'and set time to settings.startFrom', ->
+        c.time().t.should.equal c.settings.startFrom
       
-      describe 'or to a specific time', ->
+      describe 'accepts new settings', ->
         
-        it 'as an integer', ->
+        it 'precision as an integer', ->
           c.reset(1010).time().t.should.equal 1010
-        
-        it 'or as an object', ->
-          c.reset({s:1, ms:10}).time().t.should.equal 1010
         
         it 'or as a string', ->
           c.reset('1s10ms').time().t.should.equal 1010
@@ -167,10 +149,11 @@ describe 'Chrono', ->
       callDoneAndStopHandler = (time, chrono, flag) ->
         time.should.equal 0
         flag.should.equal 'start'
+        chrono.unbind callDoneAndStopHandler
         chrono.stop()
         done()
       
-      c = new Chrono {precision:100}, callDoneAndStopHandler
+      c = new Chrono {precision:20}, callDoneAndStopHandler
       c.start()
 
     it 'are all called', (done)->
@@ -182,7 +165,7 @@ describe 'Chrono', ->
           done()
         if time > 0
           done new Error 'not all handlers were called'
-      c = new Chrono({precision:100}, callback, callback, callback, callback)
+      c = new Chrono({precision:20}, callback, callback, callback, callback)
       c.start()
 
     it 'normal ticks have the -tick- flag', (done)->
@@ -190,12 +173,27 @@ describe 'Chrono', ->
       callback = (time, chrono, flag)->
         if callbackCalledOnce
           flag.should.equal 'tick'
+          chrono.unbind callback
           chrono.stop()
           done()
         callbackCalledOnce = true
         
+      c = new Chrono({precision:20}, callback)
+      c.start()
+
+    ###
+    it 'called with a -stop- flag when stopped', (done)->
+      callbackCalledOnce = false
+      callback = (time, chrono, flag)->
+        if callbackCalledOnce
+          flag.should.equal 'stop'
+          done()
+        callbackCalledOnce = true
+        chrono.stop()
+        
       c = new Chrono({precision:100}, callback)
       c.start()
+    ###
 
   ### Removed from scope for now, will be implemented in another way
   describe 'to and keepGoing', ->

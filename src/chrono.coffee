@@ -12,36 +12,25 @@ class Chrono
     precision : time between ticks (as a string or as an integer)
     or an object that include optionnal settings
       precision, same as above
-      from : the time the Chrono is initiated at start and when reset
-      to: a maximum time that triggers a flag on events
-      keepGoing: if set to true, the Chrono will stop when reaching 'to'
+      startFrom : the time the Chrono is initiated at start and when reset
 
   handlers are your callbacks, they also can be added through 'bind()' and
       removed with unbind. Note that they are NOT passed in an array
 
   ###
-  constructor:(settings = {}, @handlers...)->
-    # Allow to pass precision as a single setting
-    typeofSettings = typeof settings
-    if typeofSettings is 'number' or typeofSettings is 'string'
-      settings = precision: @toMilliseconds settings
-
+  constructor:(@settings = {}, @handlers...)->
     defaults = {
       precision: 1000,
-      from: 0
-      keepGoing: false
+      startFrom: 0
     }
 
-    if settings.precision
-      settings.precision = @toMilliseconds settings.precision
-    if settings.from
-      settings.from = @toMilliseconds settings.from
-    if settings.to
-      settings.to = @toMilliseconds settings.to
-
-    @settings = extend defaults, settings
-
-    @reset()
+    # Accept precision as a direct unique setting, pake it object
+    if @settings and typeof @settings isnt 'object'
+      @settings = precision: @toMilliseconds settings
+   
+    settings = extend defaults, settings # Apply defaults
+    
+    @reset(settings)
     
     this
   
@@ -62,15 +51,35 @@ class Chrono
   stop:->
     @__timer.stop()
     @ticking = false
+    @__callHandlers 'stop'
     this
 
   ###
-  Reset will pause the time and set the time to 0 or given time
+  Reset will stop Chrono and set the given settings
   ###
-  reset:(@__ms = @settings.from)->
+  reset:(settings)->
+    
+    @stop() if @ticking
+
+    # Overwrite settings if needed
+    if settings
+
+      # If sent settings isn't object, it's a new startFrom
+      if typeof settings isnt 'object'
+        settings = startFrom: settings
+
+      # This loop translate time related settings to numbers if needed
+      for key in ['precision', 'startFrom']
+        value = settings[key]
+        if value and typeof value isnt 'number'
+          settings[key] = @toMilliseconds value
+
+      @settings = extend @settings, settings
+    
+    # Take new settings into account
     @__timer = new Timer @settings.precision, ()=>@__tick()
-    @__ms = @toMilliseconds @__ms
-    @stop()
+    @__ms = @settings.startFrom
+
     this
 
   ###
@@ -125,7 +134,6 @@ class Chrono
   ###
   __tick:->
     @__ms += @settings.precision
-    @stop() if (not @settings.keepGoing) and @__ms >= @settings.to
     @__callHandlers 'tick'
     this
 
@@ -229,7 +237,7 @@ Overwrite properties into object. Used to overwrite settings into defaults
 ###
 extend = (object, properties)->
   for key, val of properties
-    object[key] = val
+    object[key] = val unless val is undefined
   object
   
 ###
