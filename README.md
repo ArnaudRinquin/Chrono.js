@@ -1,61 +1,102 @@
 # Chrono.js
+Javascript is really bad at handling time related tasks:
+* It's not reliable (try it yourself at https://gist.github.com/4175664)
+* It's not that easy to control
+* Durations have to be calculated
 
-A simple Javascript Chronometer implementation written in CoffeeScript. It should be very useful when developing games or any timed application.
-
-# Features
-With Chrono.js you can:
-
-* get your handlers called every `precision` milliseconds
-* pause, preset and reset it
-* get how many seconds, minutes, hours have elapsed
-
+Chrono.js is a library that focuses on solving these problems:
+* Handle time with precision
+* Do something at regular intervals
+* Easily measure durations
+* Make countdowns * To be implemented *
+* Gives exploitable information on ellapsed / remaining time
 
 # Usage
+Chrono.js exports 2 classes : `Chrono` and `Timer`.
 
-Include `chrono.min.js` in your code, no surprise:
+Including Chrono.js into your code is as easy as you could expect it:
 
 ``` html
 <script src="chrono.min.js"></script>
 ```
 
-Within node.js, require it like this:
-
-```javascript
-Chrono = require('Chrono').Chrono
-```
-
-Chrono.js does not rely on any library.
-
-# API
-## Creation
-`new Chrono([settings], [*handlers])`
-
-### Settings
-
-* `precision`: delay in miliseconds between ticks. Default is `1000`, as one second
-* `max`: the maximum time (triggers a flag on events)
-* `stopAtMaxTicks`: if set, stop the Chrono when max is reached.
+Or with require
 
 ``` javascript
-c = new Chrono({
-  precision:100, // tick every 100ms = 0.1sec
-  max: 200, // max ticks is 200*100ms = 20sec
-  stopAtMaxTicks: true // stop after 20sec
+var chronojs = require('chrono');
+var Chrono = chronojs.Chrono;
+var Timer = chronojs.Timer;
+```
+Good to know : Chrono.js does not rely on any other library.
+
+# API
+## Timer
+As said in introduction, setInterval isn't reliable uneasy to control. Timer class fixes that.
+
+Here is an example:
+
+``` javascript
+Timer = require('chrono').Timer;
+
+var timer = new Timer(100, function(){/* done every 100ms */});
+timer.start();
+// ...
+timer.stop();
+```
+
+## Chrono
+Chrono class will help you to measure passing time and make countdown.
+Importation and creation is easy.
+
+``` javascript
+var Chrono  = require('chrono').Chrono
+
+var chrono = new Chrono([settings], [*handlers]);
+```
+
+### Settings
+`precision` : time between ticks. Default is one second
+
+`startFrom` : current time value when Chrono starts (first start or reset)
+
+`stopTo` : Chrono stops when reaching this time * To be implemented *
+
+These time related values can be passed in several equivalent ways, here is an example for 1 hour, 2 minutes, 3 seconds and 4 milliseconds
+* as number in milliseconds
+ * 3723004
+* as string
+ * '1h 2m 3s 4ms'
+ * '1h2m 3s 4ms' // spaces between units are optionnal
+ * '2m 4ms 1h 3s' // order is not important
+* as an object
+ * {h:1, m:2, s:3, ms:4}
+
+Here is a complete example:
+
+``` javascript
+chrono = new Chrono({
+  precision:100,
+  startFrom: "1m 30s",
+  stopTo: {
+    h: 2
+    m: 30,
+    s:10
+  }
 });
 ```
 
 ### Handlers
 
-`handlers` params are callback function that will be called at every tick. They will be called with `ticks`, `chrono` and `maxTicksReached` parameters.
+`handlers` params are callback function that will be called at every tick. They will be called with `ticks` and `chrono` parameters.
 
 `ticks` represent the amount of ticks the Chrono has made. If you reset the
 Chrono to a certain amount of ticks or changed the time attributes, theses 
 changes will be taken into account.
 
-`maxTicksReached` will be true if the current ticks is equal to the `maxTicks` settings you may have passed.
+`flag` is the reason why the handler was called. It can be either 'tick', 'started' or 'stopped'
 
 ``` javascript
-c = new Chrono({}, function(ticks, chrono, maxTicksReached) {
+c = new Chrono({}, function(ticks, chrono, flag) { // tick every 100ms
   console.log("ticks " + ticks);
 });
 ```
@@ -72,7 +113,7 @@ You can use the 3 self-explained chainable functions:
 
 * `start()`
 * `stop()`
-* `reset([ticks])`
+* `reset([settings])`
 
 Let's say it's not clear enough, here are some hints:
 
@@ -86,7 +127,7 @@ Let's say it's not clear enough, here are some hints:
 chrono = new Chrono({precision:100});
 chrono.start();
 // ... restart from 5 seconds
-chrono.reset(5000 / 100).start();
+chrono.reset(5000).start();
 ```
 
 You can know the chrono's state from it's `ticking` attribute:
@@ -139,15 +180,6 @@ chrono.minutes = -10; //3h50min12sec (= 4h-10min12sec)
 chrono.seconds = 62; //3h51min2sec (=3h50min62sec)
 ```
 
-## Accessing remaining seconds, minutes, hours until maxTicks
-You can access these values through the follwoing read-only attributes:
-
-* secondsToMax
-* minutesToMax
-* hoursToMax
-
-They will be undefined if maxTick is not set.
-
 # Chrono.js is optimized
 Chrono.js will compute elapsed time (seconds, minutes, hours) only on access. This optimization is only available on ECMA5 compliant env (use of Object.defineProperty). You may want to use a polyfill to enjoy this feature.
 
@@ -160,31 +192,3 @@ If you want to build Chrono.js from its source, you can just use grunt.
 * `grunt all` will build and run long tests (hours)
 
 You should not have to run long tests unless you change something 'hours' attribute related because I already run them for you.
-
-# TODO (if needed)
-## API Changes
-### Time Attributes
-Instead of access to separated attributes or functions, Chrono will implement only two functions based on the same behaviour `elapsed()` and `remaining()`.
-
-Both of them will take up to two arguments:
-
-* `unit`, 't|ticks|ms|miliseconds|s|seconds|m|minutes|h|hours', the unit to get or set
-* `value`, optionnal, setter to the unit maybe be prefixed with +,-,*, or /
-
-Regex for `value` is `/^(\+|-|\*|\/)?(\d+)$/`
-
-Important: setting the remaining time will not change the elapsed time but the maxTicks.
-
-chrono.elapsed('t'); // get elapsed ticks
-chrono.remaining('t'); // get maxTicks - elapsed('t')
-chrono.elapsed('s'); // get elapsed seconds
-chrono.elapsed('m', '+2') // added two hours to elapsed time
-chrono.remaining('h','3') // set hours = 3 to remaning time (!= remaning time = 3)
-
-Note to developer (myself and I): as Date will be used, they should be cached based on the ticks (current and maxTicks) they are computed in order to save ressources.
-
-* Add a demo
-* Make a custom page including this demo
-* Add some Timer functions
-* Include Object.defineProperty polyfill / shim
-* Add special ticks handling (after `x` ticks, every `x` ticks)
