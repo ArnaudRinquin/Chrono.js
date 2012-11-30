@@ -1,88 +1,41 @@
 # Chrono.js
-Javascript is really bad at handling time related tasks:
-* It's not reliable (try it yourself at https://gist.github.com/4175664)
-* It's not that easy to control
-* Durations have to be calculated
 
-Chrono.js is a library that focuses on solving these problems:
-* Handle time with precision
-* Do something at regular intervals
-* Easily measure durations
-* Make countdowns * To be implemented *
-* Gives exploitable information on ellapsed / remaining time
+A simple Javascript Chronometer implementation written in CoffeeScript. It should be very useful when developing games or any timed application.
+
+# Features
+With Chrono.js you can:
+
+* get your handlers called every `precision` milliseconds
+* pause, preset and reset it
+* get how many seconds, minutes, hours have elapsed
+
 
 # Usage
-Chrono.js exports 2 classes : `Chrono` and `Timer`.
 
-Including Chrono.js into your code is as easy as you could expect it:
+Include `chrono.min.js` in your code, no surprise:
 
 ``` html
 <script src="chrono.min.js"></script>
 ```
 
-Or with require
+Within node.js, require it like this:
 
-``` javascript
-var chronojs = require('chrono');
-var Chrono = chronojs.Chrono;
-var Timer = chronojs.Timer;
+```javascript
+Chrono = require('Chrono').Chrono
 ```
-Good to know : Chrono.js does not rely on any other library.
+
+Chrono.js does not rely on any library.
 
 # API
-## Timer
-As said in introduction, setInterval isn't reliable uneasy to control. Timer class fixes that.
-
-Here is an example:
-
-``` javascript
-Timer = require('chrono').Timer;
-
-var timer = new Timer(100, function(){/* done every 100ms */});
-timer.start();
-// ...
-timer.stop();
-```
-
-## Chrono
-Chrono class will help you to measure passing time and make countdown.
-Importation and creation is easy.
-
-``` javascript
-var Chrono  = require('chrono').Chrono
-
-var chrono = new Chrono([settings], [*handlers]);
-```
+## Creation
+`new Chrono([settings], [*handlers])`
 
 ### Settings
-`precision` : time between ticks. Default is one second
 
-`startFrom` : current time value when Chrono starts (first start or reset)
-
-`stopTo` : Chrono stops when reaching this time * To be implemented *
-
-These time related values can be passed in several equivalent ways, here is an example for 1 hour, 2 minutes, 3 seconds and 4 milliseconds
-* as number in milliseconds
- * 3723004
-* as string
- * '1h 2m 3s 4ms'
- * '1h2m 3s 4ms' // spaces between units are optionnal
- * '2m 4ms 1h 3s' // order is not important
-* as an object
- * {h:1, m:2, s:3, ms:4}
-
-Here is a complete example:
+`precision` : delay in miliseconds between ticks. Default is `1000`, as one second
 
 ``` javascript
-chrono = new Chrono({
-  precision:100,
-  startFrom: "1m 30s",
-  stopTo: {
-    h: 2
-    m: 30,
-    s:10
-  }
-});
+c = new Chrono({precision:100});
 ```
 
 ### Handlers
@@ -93,10 +46,8 @@ chrono = new Chrono({
 Chrono to a certain amount of ticks or changed the time attributes, theses 
 changes will be taken into account.
 
-`flag` is the reason why the handler was called. It can be either 'tick', 'started' or 'stopped'
-
 ``` javascript
-c = new Chrono({}, function(ticks, chrono, flag) { // tick every 100ms
+c = new Chrono({}, function(ticks, chrono) { // tick every 100ms
   console.log("ticks " + ticks);
 });
 ```
@@ -113,7 +64,7 @@ You can use the 3 self-explained chainable functions:
 
 * `start()`
 * `stop()`
-* `reset([settings])`
+* `reset([ticks])`
 
 Let's say it's not clear enough, here are some hints:
 
@@ -127,7 +78,7 @@ Let's say it's not clear enough, here are some hints:
 chrono = new Chrono({precision:100});
 chrono.start();
 // ... restart from 5 seconds
-chrono.reset(5000).start();
+chrono.reset(5000 / 100).start();
 ```
 
 You can know the chrono's state from it's `ticking` attribute:
