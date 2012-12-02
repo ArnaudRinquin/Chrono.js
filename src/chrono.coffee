@@ -79,6 +79,7 @@ class Chrono
     # Take new settings into account
     @__timer = new Timer @settings.precision, ()=>@__tick()
     @__ms = @settings.startFrom
+    @__time = undefined # uncache time value
 
     this
 
@@ -109,11 +110,13 @@ class Chrono
     unit: ms, s, m or h
   ###
   time:(changes)->
+    return @__time unless changes or not @__time
     date = @__newDate @__ms
     if changes
       date = @__applyDateChanges date, changes
       @__ms = date.getTime()
-    @__timeObject(date)
+    @__time = @__timeObject(date) #Cache time value, msut be reset every tick
+    @__time
 
   ###
   Convert to milliseconds (integer) a given time object or string
@@ -133,6 +136,7 @@ class Chrono
   Compute elapsed time, minute and seconds attributes (unless optimized)
   ###
   __tick:->
+    @__time = undefined # Reset time object cache
     @__ms += @settings.precision
     @__callHandlers 'tick'
     this

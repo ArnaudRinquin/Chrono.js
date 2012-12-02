@@ -85,7 +85,7 @@ describe 'Chrono', ->
       c.handlers.should.not.be.empty
       c.handlers.should.contain handler2, handler3
 
-  describe 'Bindings', ->
+  describe 'Handlers binding', ->
     it 'can be added one by one', ->
       c = new Chrono
       handler = console.log
