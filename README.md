@@ -93,7 +93,7 @@ chrono = new Chrono({
 Chrono to a certain amount of ticks or changed the time attributes, theses 
 changes will be taken into account.
 
-`flag` is the reason why the handler was called. It can be either 'tick', 'started' or 'stopped'
+`flag` is the reason why the handler was called. It can be either `tick`, `started` or `stopped`
 
 ``` javascript
 c = new Chrono({}, function(ticks, chrono, flag) { // tick every 100ms
@@ -180,15 +180,14 @@ chrono.minutes = -10; //3h50min12sec (= 4h-10min12sec)
 chrono.seconds = 62; //3h51min2sec (=3h50min62sec)
 ```
 
-# Chrono.js is optimized
-Chrono.js will compute elapsed time (seconds, minutes, hours) only on access. This optimization is only available on ECMA5 compliant env (use of Object.defineProperty). You may want to use a polyfill to enjoy this feature.
-
 # Building Chrono.js
 If you want to build Chrono.js from its source, you can just use grunt.
-3 tasks are available:
+Several tasks are available:
 
-* `grunt` will build Chrono.js and run fast (<1sec) tests
-* `grunt build` will just build Chrono.js without running any tests (you don't want that)
-* `grunt all` will build and run long tests (hours)
+* `grunt` builds Chrono.js and run fast (<1sec) tests
+* `grunt build` builds Chrono.js without running any tests (you don't want that)
+* `grunt longtest` builds and run long tests (2 minutes and more)
+* `grunt buildDemo` builds Chrono.js, runs tests and builds the demo files
+* `grunt watchDemo` is buildDemo + watch any file update to re-run and refresh Chrome
 
 You should not have to run long tests unless you change something 'hours' attribute related because I already run them for you.
