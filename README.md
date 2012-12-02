@@ -45,6 +45,7 @@ timer.stop();
 ```
 
 ## Chrono
+### new Chrono()
 Chrono class will help you to measure passing time and make countdown.
 Importation and creation is easy.
 
@@ -54,7 +55,9 @@ var Chrono  = require('chrono').Chrono
 var chrono = new Chrono([settings], [*handlers]);
 ```
 
-### Settings
+#### Settings
+Settings object may have these following attributes:
+
 `precision` : time between ticks. Default is one second
 
 `startFrom` : current time value when Chrono starts (first start or reset)
@@ -84,53 +87,77 @@ chrono = new Chrono({
   }
 });
 ```
+For most case, you just need ot pass `precision`. You can pass it directly as a string or as a number but not as an Object:
+  
+``` javascript
+chrono = new Chrono(1100); // OK
+chrono = new Chrono('1s 100ms'); // OK
+chrono = new Chrono({s:1 ms:100}); // not OK
+```
 
-### Handlers
+#### Handlers
+`handlers` params are the event callbacks. They will be called with `milliseconds`, `chrono` and `flag` parameters.
 
-`handlers` params are callback function that will be called at every tick. They will be called with `ticks` and `chrono` parameters.
-
-`ticks` represent the amount of ticks the Chrono has made. If you reset the
-Chrono to a certain amount of ticks or changed the time attributes, theses 
-changes will be taken into account.
+`milliseconds` is the amount of milliseconds the Chrono counted by the chrono while ticking. Calling `time()` will provide you nicer values but we didn't want to make potentially useless computation unless you ask for it.
+  
+`chrono` is the source of the calling so you don't have to save the reference.
 
 `flag` is the reason why the handler was called. It can be either `tick`, `started` or `stopped`
 
 ``` javascript
-c = new Chrono({}, function(ticks, chrono, flag) { // tick every 100ms
+c = new Chrono({ms:100}, function(ticks, chrono, flag) { // tick every 100ms
   console.log("ticks " + ticks);
 });
 ```
 
-## Attributes
-
-You can access these attributes:
-
-* `ticking` (read-only)
-* `settings`, the default settings merged with the settings you passed
-
-## Controls
+### Controls
 You can use the 3 self-explained chainable functions:
 
 * `start()`
 * `stop()`
 * `reset([settings])`
 
-Let's say it's not clear enough, here are some hints:
+Few details:
 
 * `stop` do not reset the number of ticks, it just stops the ticking.
 * `stop` is not a toggle, you have to call `start`
-* you can set the Chrono to a given time by passing `ticks` to `reset([ticks])`. Default is `0`
-* `reset` will `stop` the Chrono so you don't have to do it first, you can chain with start if you want
+* You can change settings when calling settings with the same format as in the constructor. Only difference, you can't directly pass a precision as an object (but it's ok as a string or number).
+* `reset` will stop the Chrono so you don't have to do it first, chaining it with `start()` is easy a nice way to take new settings into account.
 
 ``` javascript
 // 100ms Chrono
 chrono = new Chrono({precision:100});
 chrono.start();
-// ... restart from 5 seconds
-chrono.reset(5000).start();
+// ... restart from 1 minute with a 5 seconds precision
+chrono.reset({
+  startFrom:'1m',
+  precision: '5s'
+}).start();
 ```
 
-You can know the chrono's state from it's `ticking` attribute:
+### Handlers bindings
+You can easily bind / unbind handlers:
+
+``` javascript
+var handler = function(ticks, chrono, flag) {
+  console.log('flag:' + flag);
+};
+  
+var anotherOne = function(){
+  console.log('tic'); 
+};
+
+var chrono = new Chrono('200ms');
+  
+chrono.bind(handler, anotherOne);
+// ...
+chrono.unbind(anotherOne); // This one would be annoying
+```
+
+### Attributes
+You can access these read-only attributes:
+* `ticking`
+* `settings`, the default settings merged with the settings you passed
 
 ```javascript
 chrono = new Chrono({precision:100});
@@ -144,40 +171,31 @@ chrono.start().reset().ticking;
 >false
 ```
 
-## Handling ticks
-The handlers you pass to your Chrono will receive to parameters every at ticks: the current `tick`number and the `chrono ` itself.
-
+### `time([changes])`
+`time()` is a read/write function on ellapsed time.
+It will always return the current ellapsed time as an object with `ms`, `s`, `m`, `h` attributes which are computed based on ellpased time.
+  
+Quick example:
 ``` javascript
-c = new Chrono({precision:100}, function(tick, chrono) { // tick every 100ms
-  console.log("this the " + tick + "th tick");
-  if (tick > 100) { // stop after 100 * 100 = 10.000ms = 10 secs
-    chrono.stop();
+
+var chrono = new Chrono({}, function(ms, ch, flag){
+  
+  if(ms === (10 + 2 * 60) * 1000) { // 2min, 10sec
+    console.log(ch.time()); // outputs {h:0, m:2, s:10, ms:0}
   }
 });
 ```
 
-## Accessing and setting elapsed time numbers
-You can access elapsed seconds (0-59), minutes (0-59) and hours (0+) by direcly accessing the corresponding attributes.
-
+It can take changes as parameters. For now, it only takes it as a string. Here are a few examples:
 ``` javascript
-chrono = new Chrono({precision:1000}); // 1 tick = 1 second
-chrono.reset(3 * 3600 + 24 * 60 + 12); // set to 3h24min12sec
-console.log(chrono.hours + 'h' + chrono.minutes + 'min' + chrono.seconds + 'sec');
->3h24min12sec
-```
-
-You can also set them individually (*only in optimized mode, see below*):
-
-```
-chrono = new Chrono({precision:1000}); // 1 tick = 1 second
-chrono.reset(3 * 3600 + 24 * 60 + 12); // set to 3h24min12sec
-chrono.hours = 4; //4h24min12sec
-chrono.minutes = 10; //4h10min12sec
-chrono.seconds = 2; //4h10min2sec
-
-// you can do some very odd things too
-chrono.minutes = -10; //3h50min12sec (= 4h-10min12sec)
-chrono.seconds = 62; //3h51min2sec (=3h50min62sec)
+var chrono = new Chrono();
+chrono.time('1s'); // {h:0, m:0, s:1, ms:0}
+chrono.time('+2s'); // {h:0, m:0, s:3, ms:0}
+chrono.time('+3m'); // {h:0, m:3, s:3, ms:0}
+chrono.time('*5m'); // {h:0, m:15, s:3, ms:0}
+chrono.time('-5m 10s'); {h:0, m:10, s:10, ms:0}, handles several changes at one
+chrono.time('/2m'); {h:0, m:5, s:0, ms:0}
+chrono.time('+5h1500ms'); {h:5, m:10, s:11, ms:500}, spaces are optionnal
 ```
 
 # Building Chrono.js
@@ -190,4 +208,4 @@ Several tasks are available:
 * `grunt buildDemo` builds Chrono.js, runs tests and builds the demo files
 * `grunt watchDemo` is buildDemo + watch any file update to re-run and refresh Chrome
 
-You should not have to run long tests unless you change something 'hours' attribute related because I already run them for you.
+You don't have to run long tests unless you change something because I already run them for you.
