@@ -69,7 +69,7 @@ class Chrono
         settings = startFrom: settings
 
       # This loop translate time related settings to numbers if needed
-      for key in ['precision', 'startFrom']
+      for key in ['precision', 'startFrom', 'stopTo']
         value = settings[key]
         if value and typeof value isnt 'number'
           settings[key] = @toMilliseconds value
@@ -79,7 +79,7 @@ class Chrono
     # Take new settings into account
     @__timer = new Timer @settings.precision, ()=>@__tick()
     @__ms = @settings.startFrom
-    @__time = undefined # uncache time value
+    @__time = @__remainingTime = undefined # uncache time value
 
     this
 
@@ -110,13 +110,25 @@ class Chrono
     unit: ms, s, m or h
   ###
   time:(changes)->
-    return @__time unless changes or not @__time
+    return @__time if @__time and not changes
     date = @__newDate @__ms
     if changes
       date = @__applyDateChanges date, changes
       @__ms = date.getTime()
-    @__time = @__timeObject(date) #Cache time value, msut be reset every tick
+    @__time = @__timeObject date #Cache time value, msut be reset every tick
     @__time
+
+  ###
+  remainingTime([changes])
+  ###
+  remainingTime:(changes)->
+    return @__remainingTime if @__remainingTime and not changes
+    return undefined unless @settings.stopTo
+    remainingDuration = @__newDate(@settings.stopTo - @__ms)
+    if changes
+      remainingDuration = @__applyDateChanges remainingDuration, changes
+      @settings.stopTo = remainingDuration.getTime()
+    @__timeObject remainingDuration
 
   ###
   Convert to milliseconds (integer) a given time object or string
@@ -136,9 +148,12 @@ class Chrono
   Compute elapsed time, minute and seconds attributes (unless optimized)
   ###
   __tick:->
-    @__time = undefined # Reset time object cache
+    @__time = @__remainingTime = undefined # Reset time object cache
     @__ms += @settings.precision
-    @__callHandlers 'tick'
+    if @settings.stopTo and @__ms >= @settings.stopTo
+      @stop()
+    else
+      @__callHandlers 'tick'
     this
 
   ###

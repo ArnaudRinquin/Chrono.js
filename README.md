@@ -8,7 +8,7 @@ Chrono.js is a library that focuses on solving these problems:
 * Handle time with precision
 * Do something at regular intervals
 * Easily measure durations
-* Make countdowns * To be implemented *
+* Make countdowns
 * Gives exploitable information on ellapsed / remaining time
 
 # Usage
@@ -62,7 +62,7 @@ Settings object may have these following attributes:
 
 `startFrom` : current time value when Chrono starts (first start or reset)
 
-`stopTo` : Chrono stops when reaching this time * To be implemented *
+`stopTo` : Chrono stops when reaching this time
 
 These time related values can be passed in several equivalent ways, here is an example for 1 hour, 2 minutes, 3 seconds and 4 milliseconds
 * as number in milliseconds

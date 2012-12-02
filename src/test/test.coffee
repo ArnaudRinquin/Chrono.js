@@ -33,27 +33,26 @@ describe 'Chrono', ->
         c.should.be.ok
         c.settings.precision.should.equal 1010
 
-    ### Removed from scope for now will be implemented in another way
-    describe 'can be created with specific maximum value (to)', ->
+    describe 'can be created with specific stopTo value', ->
       it 'as an integer (milliseconds)', ->
         c = new Chrono
           precision: 100,
-          to: 50
-        c.settings.to.should.equal 50
+          stopTo: 50
+        c.settings.stopTo.should.equal 50
 
       it 'or as an object', ->
         c = new Chrono
           precision: 100,
-          to: {ms:50, s:3}
-        c.settings.to.should.equal 3050
+          stopTo: {ms:50, s:3}
+        c.settings.stopTo.should.equal 3050
 
       it 'or as string', ->
         c = new Chrono
           precision: 100,
-          to: '2min 3sec 10ms'
-        c.settings.to.should.equal 123010
-    ###
-    describe 'can be created with specific initial value (startFrom)', ->
+          stopTo: '2min 3sec 10ms'
+        c.settings.stopTo.should.equal 123010
+    
+    describe 'can be created with specific startFrom value', ->
       it 'as an integer (milliseconds)', ->
         c = new Chrono
           precision: 100,
@@ -181,61 +180,35 @@ describe 'Chrono', ->
       c = new Chrono({precision:20}, callback)
       c.start()
 
-    ###
     it 'called with a -stop- flag when stopped', (done)->
-      callbackCalledOnce = false
-      callback = (time, chrono, flag)->
-        if callbackCalledOnce
-          flag.should.equal 'stop'
-          done()
-        callbackCalledOnce = true
-        chrono.stop()
+      called = 0
+      cb = (ms, chrono, flag)->
+        called++
+        switch called
+          when 1
+            c.stop()
+          when 2
+            flag.should.equal 'stop'
+            done()
+          else
+            throw new Error 'Handler called after stop()'
         
-      c = new Chrono({precision:100}, callback)
+      c = new Chrono({precision:100}, cb)
       c.start()
-    ###
 
-  ### Removed from scope for now, will be implemented in another way
-  describe 'to and keepGoing', ->
-    it 'triggers to flag on events', (done)->
+  describe 'stopTo', ->
+    it 'triggers -stop- flag and stops', (done)->
       s =
         precision:10,
-        to: 30
+        stopTo: 30
 
-      c = new Chrono s, (time, chrono, toReached)->
+      c = new Chrono s, (time, chrono, flag)->
         if time is 30
-          expect(toReached).to.be.true
-          c.stop()
+          expect(flag).to.equal 'stop'
+          chrono.ticking.should.be.false
           done()
       c.start()
-
-    it 'keep ticking if keepGoing is set true', (done)->
-      s =
-        precision:10,
-        to: 50,
-        keepGoing: true
-
-      c = new Chrono s, (time, chrono, toReached)->
-        if time is 50
-          c.ticking.should.be.true
-          toReached.should.be.true
-        if time is 60
-          c.stop()
-          done()
-      c.start()
-
-    it 'stops at to if keepGoing is not specified', (done)->
-      s =
-        precision:10,
-        to: 50
-
-      c = new Chrono s, (time, chrono, toReached)->
-        if time is 50
-          c.ticking.should.be.false
-          done()
-      c.start()
-  ###
-
+  
   describe 'time', ->
     describe 'returns a correct time object', ->
       it 'at t+0', ->
@@ -334,3 +307,51 @@ describe 'Chrono', ->
           time.s.should.equal 3
           time.m.should.equal 35
           time.h.should.equal 4
+    describe 'remainingTime()',->
+      it 'returns undefined if stopTo is undefined',->
+        c = new Chrono()
+        expect(c.remainingTime()).not.to.exist
+
+      it 'returns the right time at start',->
+        c = new Chrono {
+          stopTo:{
+            m:1,
+            s:30
+          }
+        }
+        r = c.remainingTime()
+        r.m.should.equal 1
+        r.s.should.equal 30
+
+      it 'returns the right time at an point of time',->
+        c = new Chrono {
+          startFrom:{
+            m:1,
+            s:13
+          },
+          stopTo:{
+            m:2,
+            s:30
+          }
+        }
+        r = c.remainingTime()
+        r.m.should.equal 1
+        r.s.should.equal 17
+
+      it 'takes changes into account',->
+        c = new Chrono {
+          stopTo:{
+            m:2,
+            s:30
+          }
+        }
+        r = c.remainingTime '+1h 3m -15s'
+        r.h.should.equal 1
+        r.m.should.equal 3
+        r.s.should.equal 15
+
+        r = c.remainingTime '*5h +15m +90s 300ms'
+        r.h.should.equal 5
+        r.m.should.equal 19
+        r.s.should.equal 45
+        r.ms.should.equal 300
