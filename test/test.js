@@ -279,7 +279,7 @@
       });
     });
     describe('stopTo', function() {
-      return it('triggers -stop- flag and stops', function(done) {
+      return it('triggers -end- flag and stops', function(done) {
         var c, s;
         s = {
           precision: 10,
@@ -287,7 +287,7 @@
         };
         c = new Chrono(s, function(time, chrono, flag) {
           if (time === 30) {
-            expect(flag).to.equal('stop');
+            expect(flag).to.equal('end');
             chrono.ticking.should.be["false"];
             return done();
           }

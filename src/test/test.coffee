@@ -197,14 +197,14 @@ describe 'Chrono', ->
       c.start()
 
   describe 'stopTo', ->
-    it 'triggers -stop- flag and stops', (done)->
+    it 'triggers -end- flag and stops', (done)->
       s =
         precision:10,
         stopTo: 30
 
       c = new Chrono s, (time, chrono, flag)->
         if time is 30
-          expect(flag).to.equal 'stop'
+          expect(flag).to.equal 'end'
           chrono.ticking.should.be.false
           done()
       c.start()

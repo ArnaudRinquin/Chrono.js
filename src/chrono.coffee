@@ -49,9 +49,7 @@ class Chrono
   Don't use it as a toggle function, no effect if already paused
   ###
   stop:->
-    @__timer.stop()
-    @ticking = false
-    @__callHandlers 'stop'
+    @__stop 'stop'
     this
 
   ###
@@ -151,7 +149,7 @@ class Chrono
     @__time = @__remainingTime = undefined # Reset time object cache
     @__ms += @settings.precision
     if @settings.stopTo and @__ms >= @settings.stopTo
-      @stop()
+      @__stop 'end'
     else
       @__callHandlers 'tick'
     this
@@ -169,6 +167,12 @@ class Chrono
     modifications.push modif while modif = reg.exec changes
     date = @__dateSingleChange(date, modif) for modif in modifications
     date
+
+  __stop:(reason)->
+    @__timer.stop()
+    @ticking = false
+    @__callHandlers reason
+    this
 
   __dateSingleChange:(date, change)->
     [useless, operation, value, unit] = change

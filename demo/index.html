@@ -23,12 +23,14 @@
                 <li>Start, Stop, Reset the chronometer / timer</li>
               </ul>
             </p>
-            <p></p>You may think this kind of things are easy to do ? Remember you only have
-            setTimeout and setInterval to do so.
+            <p>
+              You may think this kind of things are easy to do ? Remember you only have
+              setTimeout and setInterval to do so.
+            </p>
           </section>
           <section id="metronome">
             <h3>Simpliest possible example : The metronome</h3>
-            <p>This example shows Chrono.js defaults settings, start(), stop(), and ticking attribute.</p>
+            <div>This example demonstrates Chrono.js defaults settings, <code>start(), stop(), and bind()</code></div>
             <div class="row-fluid">
               <div class="span6">
                 <pre class="prettyprint linenums">var chrono = new Chrono();
@@ -54,7 +56,13 @@ $('.metronome').bind('click', function(){
             </div>
             <section id="chronometer">
               <h3>Textual chronometer</h3>
-              <p>We will set a higher precision and use the information given at each tick</p>
+              <div>
+                This demonstrates high
+                <code>precision</code>
+                and use
+                <code>time()</code>
+                for display
+              </div>
               <div class="row-fluid">
                 <div class="span6">
                   <pre class="prettyprint linenums">var chrono = new Chrono({
@@ -92,8 +100,72 @@ $('.start').bind('click', function(){
                 </div>
                 <div class="span4 well">
                   <p class="chronometer"><span class="m">00</span><span>:</span><span class="s">00</span><span>:</span><span class="ms">00</span><span class="start"><i class="icon-play"></i></span><span class="stop"><i class="icon-stop"></i></span><span class="reset"><i class="icon-refresh"></i></span></p>
-                  <p>Enjoy this very simple chronometer !</p>
-                  <p>Don't hesitate to check its precision againt a real one :)</p>
+                  <div>Enjoy this very simple chronometer !
+                    <p>Don't hesitate to check its precision againt a real one :)</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section id="timer">
+              <h3>Textual timer</h3>
+              <div>
+                This example demonstrates 
+                <code>stopTo</code>
+                to set the timer value and use 
+                <code> remainingTime() </code>
+                for display.
+              </div>
+              <p>Also shows the use of event flag to detect timer's end.</p>
+              <div class="row-fluid">
+                <div class="span6">
+                  <pre class="prettyprint linenums">var chrono = new Chrono({
+  precision: 10,
+  stopTo: '3m'
+});
+
+var alert = $('.alert');
+alert.hide();
+
+addZero = function(number) {
+  if (number &gt; 9) {
+    return number;
+  } else {
+    return '0' + number;
+  }
+};
+
+chrono.bind(function(millis, c, flag) {
+  var time = chrono.remainingTime();
+  $('.m').html(addZero(time.m));
+  $('.s').html(addZero(time.s));
+  $('.ms').html(addZero(parseInt(time.ms / 10)));
+  
+  if (flag === 'stop') {
+    return alert.show();
+  }
+});
+
+start.bind('click', function() {
+  chrono.start();
+});
+
+stop.bind('click', function() {
+  chrono.stop();
+});
+
+reset.bind('click', function() {
+  alert.hide();
+  chrono.reset();
+  $('.m').html('03');
+  $('.s').html('00');
+  $('.ms').html('00');
+});
+</pre>
+                </div>
+                <div class="span4 well">
+                  <p class="timer"><span class="m">03</span><span>:</span><span class="s">00</span><span>:</span><span class="ms">00</span><span class="start"><i class="icon-play"></i></span><span class="stop"><i class="icon-stop"></i></span><span class="reset"><i class="icon-refresh"></i></span></p>
+                  <div>This is 3 minutes timer (perfect of for cooking eggs)</div>
+                  <div class="alert alert-success"><strong>Eggs ready ! </strong><span>Have a nice meal :)</span></div>
                 </div>
               </div>
             </section>
@@ -102,6 +174,7 @@ $('.start').bind('click', function(){
       </div>
     </div>
     <script type="text/javascript" src="./assets/jquery.min.js"></script>
+    <script type="text/javascript" src="./assets/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="./assets/google-code-prettify/prettify.js"></script>
     <script type="text/javascript" src="../lib/chrono.js"></script>
     <script type="text/javascript" src="./assets/script.js"></script>

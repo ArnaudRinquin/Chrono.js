@@ -5,7 +5,7 @@ Most simple example
 
 
 (function() {
-  var chronometer, metronome;
+  var chronometer, metronome, timer;
 
   metronome = function(containerId) {
     var chrono, container, controls, handler, tictacs;
@@ -74,6 +74,53 @@ Most simple example
     });
   };
 
+  timer = function(containerId) {
+    var addZero, alert, chrono, container, m, ms, reset, s, start, stop;
+    container = $(containerId);
+    m = container.find('.m');
+    s = container.find('.s');
+    ms = container.find('.ms');
+    start = container.find('.start');
+    stop = container.find('.stop');
+    reset = container.find('.reset');
+    alert = container.find('.alert');
+    alert.hide();
+    chrono = new Chrono({
+      precision: 10,
+      stopTo: '3m'
+    });
+    addZero = function(number) {
+      if (number > 9) {
+        return number;
+      } else {
+        return '0' + number;
+      }
+    };
+    chrono.bind(function(millis, c, flag) {
+      var time;
+      time = chrono.remainingTime();
+      m.html(addZero(time.m));
+      s.html(addZero(time.s));
+      ms.html(addZero(parseInt(time.ms / 10)));
+      if (flag === 'end') {
+        return alert.fadeIn();
+      }
+    });
+    start.bind('click', function() {
+      return chrono.start();
+    });
+    stop.bind('click', function() {
+      return chrono.stop();
+    });
+    return reset.bind('click', function() {
+      alert.hide();
+      chrono.reset();
+      m.html('03');
+      s.html('00');
+      return ms.html('00');
+    });
+  };
+
   window.prettyPrint && prettyPrint();
 
   /*
@@ -84,5 +131,7 @@ Most simple example
   metronome('#metronome');
 
   chronometer('#chronometer');
+
+  timer('#timer');
 
 }).call(this);

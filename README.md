@@ -102,7 +102,7 @@ chrono = new Chrono({s:1 ms:100}); // not OK
   
 `chrono` is the source of the calling so you don't have to save the reference.
 
-`flag` is the reason why the handler was called. It can be either `tick`, `started` or `stopped`
+`flag` is the reason why the handler was called. It can be either `tick`, `started`, `stopped` or `end`
 
 ``` javascript
 c = new Chrono({ms:100}, function(ticks, chrono, flag) { // tick every 100ms
