@@ -1,0 +1,58 @@
+.metronome {
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  position: relative;
+  width: 30px;
+  height: 80px;
+  margin: 10px;
+  background-color: #c2c2c2;
+  border: 1px solid #a9a9a9;
+}
+.metronome .needle {
+  -webkit-transition: all 1s ease-in-out;
+  -moz-transition: all 1s ease-in-out;
+  -o-transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;
+  -webkit-transform: rotate(40deg);
+  -moz-transform: rotate(40deg);
+  -ms-transform: rotate(40deg);
+  -o-transform: rotate(40deg);
+  transform: rotate(40deg);
+  width: 1px;
+  height: 80px;
+  position: absolute;
+  bottom: 0;
+  left: 14.5px;
+  background-color: #424242;
+}
+.metronome .needle::after {
+  position: absolute;
+  content: '';
+  background-color: #424242;
+  width: 10px;
+  height: 10px;
+  bottom: 0px;
+  left: -5px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+}
+.metronome.tick .needle {
+  -webkit-transform: rotate(-40deg);
+  -moz-transform: rotate(-40deg);
+  -ms-transform: rotate(-40deg);
+  -o-transform: rotate(-40deg);
+  transform: rotate(-40deg);
+}
+.metronome.stopped .needle {
+  -webkit-transform: rotate(0);
+  -moz-transform: rotate(0);
+  -ms-transform: rotate(0);
+  -o-transform: rotate(0);
+  transform: rotate(0);
+}

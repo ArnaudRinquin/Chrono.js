@@ -1,115 +1,343 @@
-# An easy chronometer. Provide start / stop / reset functions.
-# You may want to specificy the precision a.k.a the delay between ticks.
-# Allow tick handlers to be called. Handlers can be push or remove by
-# direct manipulation of @tickHandlers attribute.
+###
+An easy chronometer. Provide start / stop / reset functions.
+You may want to specificy the precision a.k.a the delay between ticks.
+Passed handlers will be called at eahch tick. Current time can be read, write
+or updated. All time inputs can be given as integer (milliseconds) detailed
+object or human readable strings.
+###
 class Chrono
-  constructor:(settings, @tickHandlers...)->
+
+  ###
+  settings can be :
+    precision : time between ticks (as a string or as an integer)
+    or an object that include optionnal settings
+      precision, same as above
+      startFrom : the time the Chrono is initiated at start and when reset
+
+  handlers are your callbacks, they also can be added through 'bind()' and
+      removed with unbind. Note that they are NOT passed in an array
+
+  ###
+  constructor:(@settings = {}, @handlers...)->
     defaults = {
       precision: 1000,
-      maxTicks: undefined,
-      stopAtMaxTicks: false
+      startFrom: 0
     }
-    @settings = extend defaults, settings
-    @reset()
 
-  # Start the ticking, do nothing if already started
+    # Accept precision as a direct unique setting, pake it object
+    if @settings and typeof @settings isnt 'object'
+      @settings = precision: @toMilliseconds settings
+   
+    settings = extend defaults, settings # Apply defaults
+    
+    @reset(settings)
+    
+    this
+  
+  ###
+  Starts ticking, do nothing if already started
+  ###
   start:->
-    return this if @__handlers #handler means it's already stared so do nothing
-    @__callHandlers() #call handlers @ start
-    # make use of '=>' to ensure the scope
-    @__handlers = setInterval ((args)=>@__tick args), @settings.precision
+    return this if @ticking
     @ticking = true
+    @__timer.start()
+    @__callHandlers 'start'
     this
 
-  # Stop will just stop ticking if already started
-  # Don't use it as a toggle function, no effect if already paused
+  ###
+  Stop will just stop ticking if already started
+  Don't use it as a toggle function, no effect if already paused
+  ###
   stop:->
-    clearInterval @__handlers if @__handlers
-    @__handlers = null
-    @ticking = false
+    @__stop 'stop'
     this
 
-  # Reset will pause the time and set the time to 0 or given time (in seconds)
-  reset:(@__ticks = 0)->
-    @stop()
+  ###
+  Reset will stop Chrono and set the given settings
+  ###
+  reset:(settings)->
+    
+    @stop() if @ticking
+
+    # Overwrite settings if needed
+    if settings
+
+      # If sent settings isn't object, it's a new startFrom
+      if typeof settings isnt 'object'
+        settings = startFrom: settings
+
+      # This loop translate time related settings to numbers if needed
+      for key in ['precision', 'startFrom', 'stopTo']
+        value = settings[key]
+        if value and typeof value isnt 'number'
+          settings[key] = @toMilliseconds value
+
+      @settings = extend @settings, settings
+    
+    # Take new settings into account
+    @__timer = new Timer @settings.precision, ()=>@__tick()
+    @__ms = @settings.startFrom
+    @__time = @__remainingTime = undefined # uncache time value
+
     this
 
-  # Compute elapsed time, minute and seconds attributes (unless optimized)
+  ###
+  Add an handler. It will be called with 3 arguments:
+     time: the current Chrono time in milliseconds
+     chrono: the Chrono itself
+     toIsReach: is the current time later than 'to'
+  ###
+  bind:(handlers...)->
+    @handlers.push(handler) for handler in handlers
+
+  ###
+  Remove an handler.
+  ###
+  unbind:(handlers...)->
+    for handler in handlers
+      for h, index in @handlers
+        @handlers.splice index, 1 if h is handler
+    this
+
+
+  ###
+  time([changes])
+    changes: (operation value unit)* concatenation
+    opertation: +, -, *, / or nothing
+    value: integer
+    unit: ms, s, m or h
+  ###
+  time:(changes)->
+    return @__time if @__time and not changes
+    date = @__newDate @__ms
+    if changes
+      date = @__applyDateChanges date, changes
+      @__ms = date.getTime()
+    @__time = @__timeObject date #Cache time value, msut be reset every tick
+    @__time
+
+  ###
+  remainingTime([changes])
+  ###
+  remainingTime:(changes)->
+    return @__remainingTime if @__remainingTime and not changes
+    return undefined unless @settings.stopTo
+    remainingDuration = @__newDate(@settings.stopTo - @__ms)
+    if changes
+      remainingDuration = @__applyDateChanges remainingDuration, changes
+      @settings.stopTo = remainingDuration.getTime()
+    @__timeObject remainingDuration
+
+  ###
+  Convert to milliseconds (integer) a given time object or string
+  obect may have ms, s, m and h property corresponding to milliseconds,
+  seconds, minutes and hours.
+  ###
+  toMilliseconds:(value)->
+    millis = 0
+    switch(typeof value)
+      when 'number' then millis = value
+      when 'string' then millis = @__stringToMilliseconds value
+      when 'object' then millis = @__objectToMilliseconds value
+      else throw new Error 'unknow format : ' + value
+    Math.floor millis
+
+  ###
+  Compute elapsed time, minute and seconds attributes (unless optimized)
+  ###
   __tick:->
-    @__ticks++
-    @stop() if @settings.stopAtMaxTicks and @__ticks is @settings.maxTicks
-    unless Chrono::optimized
-      elapsedSeconds = Math.floor(@__ticks * @settings.precision / 1000)
-      @seconds = elapsedSeconds % 60
-      @minutes = Math.floor(elapsedSeconds / 60) % 60
-      @hours = Math.floor elapsedSeconds / 3600
-    @__callHandlers()
+    @__time = @__remainingTime = undefined # Reset time object cache
+    @__ms += @settings.precision
+    if @settings.stopTo and @__ms >= @settings.stopTo
+      @__stop 'end'
+    else
+      @__callHandlers 'tick'
     this
 
-  __callHandlers:->
-    h @__ticks, this, @__ticks is @settings.maxTicks for h in @tickHandlers
+  ###
+  Just call handlers with current time in ms, this chrono, to is reached flag
+  ###
+  __callHandlers:(flag)->
+    h @__ms, this, flag for h in @handlers
     this
 
+  __applyDateChanges:(date, changes)->
+    reg = /([+\-*\/]?)(\d+)(ms|[tsmh])\s?/g
+    modifications = []
+    modifications.push modif while modif = reg.exec changes
+    date = @__dateSingleChange(date, modif) for modif in modifications
+    date
 
-if Object.defineProperty
+  __stop:(reason)->
+    @__timer.stop()
+    @ticking = false
+    @__callHandlers reason
+    this
 
-  Chrono::optimized = true
+  __dateSingleChange:(date, change)->
+    [useless, operation, value, unit] = change
+    value = parseInt value
+    finalValue = 0
 
-  Object.defineProperty Chrono.prototype, '__date',
-    # Date(0) time is 01:00:00 so we have an hour delta
-    get:-> new Date -3600000 + @__ticks * @settings.precision
-    set:(date)->
-      @__ticks = (3600000 + date.getTime()) / @settings.precision
-      date
+    unless operation is undefined
+      switch unit
+        when 'ms' then finalValue = date.getMilliseconds()
+        when 's' then finalValue = date.getSeconds()
+        when 'm' then finalValue = date.getMinutes()
+        when 'h' then finalValue = date.getHours()
 
-  Object.defineProperty Chrono.prototype, 'seconds',
-    get:-> @__date.getSeconds()
-    set:(seconds)->
-      @__date = new Date(@__date.setSeconds seconds)
-      seconds
+      switch operation
+        when '+' then finalValue += value
+        when '-' then finalValue -= value
+        when '*' then finalValue *= value
+        when '/' then finalValue /= value
+        when '' then finalValue = value
 
-  Object.defineProperty Chrono.prototype, 'minutes',
-    get:-> @__date.getMinutes()
-    set:(minutes)->
-      newDate = @__date
-      newDate.setMinutes minutes
-      @__date = newDate
-      minutes
+    switch unit
+      when 'ms' then date.setMilliseconds(finalValue)
+      when 's' then date.setSeconds(finalValue)
+      when 'm' then date.setMinutes(finalValue)
+      when 'h' then date.setHours(finalValue)
 
-  Object.defineProperty Chrono.prototype, 'hours',
-    get:-> @__date.getHours()
-    set:(hours)->
-      newDate = @__date
-      newDate.setHours hours
-      @__date = newDate
-      hours
+    date
 
-  Object.defineProperty Chrono.prototype, '__dateToMax',
-    # Date(0) time is 01:00:00 so we have an hour delta
-    get:->
-      maxDate = new Date -3600000 + @settings.maxTicks * @settings.precision
-      new Date -3600000 + maxDate.getTime() - @__date.getTime()
+  ###
+  Build the current time object
+  ###
+  __timeObject:(date)->
+    time =
+      ms:date.getMilliseconds(),
+      s:date.getSeconds(),
+      m:date.getMinutes(),
+      h:date.getHours(),
+      t:date.getTime()
 
-  Object.defineProperty Chrono.prototype, 'secondsToMax',
-    get:->
-      return undefined unless @settings.maxTicks
-      @__dateToMax.getSeconds()
+  ###
+  Returns a zero-ed Date + milliseconds
+  Needed because new Date(0) time is 01:00:00 and we want it 00:00:00
+  ###
+  __newDate:(milliseconds)->
+    new Duration milliseconds
 
-  Object.defineProperty Chrono.prototype, 'minutesToMax',
-    get:->
-      return undefined unless @settings.maxTicks
-      @__dateToMax.getMinutes()
+  ###
+  Convert a time object to a duration in milliseconds
+  ###
+  __objectToMilliseconds:(obj)->
+    millis = 0
+    millis += obj.ms if typeof obj.ms is 'number'
+    millis += obj.s * 1000 if typeof obj.s is 'number'
+    millis += obj.m * 60000 if typeof obj.m is 'number'
+    millis += obj.h * 3600000 if typeof obj.h is 'number'
+    millis
 
-  Object.defineProperty Chrono.prototype, 'hoursToMax',
-    get:->
-      return undefined unless @settings.maxTicks
-      @__dateToMax.getHours()
+    ###
+    Convert string such as '1s2m 3h' to corresponding duration in ms
+    ###
+  __stringToMilliseconds:(string)->
+    reg = /(\d+)(ms|[tsmh])\s?/g
+    millis = 0
+    values = []
+    values.push value while value = reg.exec string
+    millis += @__subStringToMilliseconds value for value in values
+    millis
 
+    ###
+    Convert string suc as '1s' or '2m' to duration in ms
+    ###
+  __subStringToMilliseconds:(value)->
+    [useless, numbr, unit] = value
+    numbr = parseInt numbr
+    millis = 0
+    switch unit
+      when 'ms' then millis = numbr
+      when 's' then millis = numbr * 1000
+      when 'm' then millis = numbr * 60000
+      when 'h' then millis = numbr * 3600000
+    millis
+
+###
+Overwrite properties into object. Used to overwrite settings into defaults
+###
 extend = (object, properties)->
   for key, val of properties
-    object[key] = val
+    object[key] = val unless val is undefined
   object
+  
+###
+Precise timer based on https://gist.github.com/1185904
+###
+class Timer
+  constructor:(@precision = 1000, @callback)->
+    @started = false
+    this
+
+  start:()->
+    return this if @__handle
+    @started = true
+    @__baseline = new Date().getTime()
+    @__setTimeout()
+    this
+
+  stop:()->
+    @started = false
+    clearTimeout @__handle
+    @__handle = undefined
+    this
+    
+  __setTimeout:()->
+    now = new Date().getTime()
+    nextTimeout = @precision - now + @__baseline
+    nextTimeout = 0 if nextTimeout < 0
+    
+    cb = ()=>
+      @__setTimeout()
+      @callback()
+    
+    @__handle = setTimeout cb, nextTimeout
+    @__baseline += @precision
+
+###
+Class covering the native Date functions I used to use. Same signatures except
+it does not have this 1 hour dif to be dealt with. Not sure about a perf boost.
+###
+class Duration
+  constructor:(@__ms = 0)->
+    this
+
+  getTime:()->
+    @__ms
+
+  getMilliseconds:()->
+    @__ms % 1000
+
+  getSeconds:()->
+    Math.floor(@__ms / 1000) % 60
+
+  getMinutes:()->
+    Math.floor(@__ms / 60000) % 60
+
+  getHours:()->
+    Math.floor(@__ms / 3600000)
+
+  setTime:(@__ms)->
+    @__ms
+
+  setMilliseconds:(milliseconds)->
+    @__ms = @__ms - @getMilliseconds() + milliseconds
+
+  setSeconds:(seconds)->
+    delta = (seconds - @getSeconds()) * 1000
+    @__ms = @__ms + delta
+
+  setMinutes:(minutes)->
+    delta = (minutes - @getMinutes()) * 60000
+    @__ms = @__ms + delta
+
+  setHours:(hours)->
+    delta = (hours - @getHours()) * 3600000
+    @__ms = @__ms + delta
 
 # Module exportation
 root = exports ? this
 root.Chrono = Chrono
+root.Timer = Timer
