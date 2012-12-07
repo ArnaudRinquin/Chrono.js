@@ -1,6 +1,6 @@
 # Chrono.js
 Javascript is really bad at handling time related tasks:
-* It's not reliable (try it yourself at https://gist.github.com/4175664)
+* It's not accurate (try it yourself at https://gist.github.com/4175664)
 * It's not that easy to control
 * Durations have to be calculated
 
@@ -10,6 +10,18 @@ Chrono.js is a library that focuses on solving these problems:
 * Easily measure durations
 * Make countdowns
 * Gives exploitable information on ellapsed / remaining time
+
+# Summary
+* [Usage](#usage)
+* [Timer](#timer)
+* [Chrono](#chrono)
+* [new Chrono()](#new-chrono)
+* [start(), stop(), reset()](#controls)
+* [handlers binding](#handlers-binding)
+* [ticking, settings](#attributes)
+* [time()](#timechanges)
+* [remainingTime()](#remainingtimechanges)
+* [Building Chorno.js](#building-chronojs)
 
 # Usage
 Chrono.js exports 2 classes : `Chrono` and `Timer`.
@@ -31,7 +43,7 @@ Good to know : Chrono.js does not rely on any other library.
 
 # API
 ## Timer
-As said in introduction, setInterval isn't reliable uneasy to control. Timer class fixes that.
+As said in introduction, setInterval isn't accurate and uneasy to control. Timer class fixes that.
 
 Here is an example:
 
@@ -135,7 +147,7 @@ chrono.reset({
 }).start();
 ```
 
-### Handlers bindings
+### Handlers binding
 You can easily bind / unbind handlers:
 
 ``` javascript
