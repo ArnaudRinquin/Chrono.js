@@ -102,7 +102,7 @@ chrono = new Chrono({s:1 ms:100}); // not OK
   
 `chrono` is the source of the calling so you don't have to save the reference.
 
-`flag` is the reason why the handler was called. It can be either `tick`, `started`, `stopped` or `end`
+`flag` is the reason why the handler was called. It can be either `tick`, `start`, `stop` or `end`
 
 ``` javascript
 c = new Chrono({ms:100}, function(ticks, chrono, flag) { // tick every 100ms
@@ -180,7 +180,7 @@ Quick example:
 
 var chrono = new Chrono({}, function(ms, ch, flag){
   
-  if(ms === (10 + 2 * 60) * 1000) { // 2min, 10sec
+  if(ms === 130000) { // 2min, 10sec
     console.log(ch.time()); // outputs {h:0, m:2, s:10, ms:0}
   }
 });
@@ -196,6 +196,29 @@ chrono.time('*5m'); // {h:0, m:15, s:3, ms:0}
 chrono.time('-5m 10s'); {h:0, m:10, s:10, ms:0}, handles several changes at one
 chrono.time('/2m'); {h:0, m:5, s:0, ms:0}
 chrono.time('+5h1500ms'); {h:5, m:10, s:11, ms:500}, spaces are optionnal
+```
+  
+### `remainingTime([changes])`
+`remainingTime()` works the very like `time()` except it's related to the time until `stopTo` is reached. It will return the same type of time object when called and can take changes into account if needed. Changes will be applied by changing the settings.stopTo value.
+  
+It will return `undefined` if no value has been set to `stopTo`.
+  
+Here is an example :
+  
+```javascript
+var chrono = new Chrono({
+  startFrom:'3m10s',
+  stopTo:'5m42s'
+});
+
+console.log chrono.remainingTime();
+// outputs : {h:0, m:2, s:32, ms:0}
+
+console.log chrono.remaningTime('+2m -12s');
+// outputs : {h:0, m:4, s:20, ms:0}
+  
+console.log chrono.time();
+// outputs : {h:0, m:3, s:10, ms:0} as current time never changed
 ```
 
 # Building Chrono.js
