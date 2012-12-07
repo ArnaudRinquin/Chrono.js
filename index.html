@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Chrono.js : High accuracy Javascript timer and chronometer library written in CoffeeScript" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Chrono.js</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ArnaudRinquin/Chrono.js">View on GitHub</a>
+
+          <h1 id="project_title">Chrono.js</h1>
+          <h2 id="project_tagline">High accuracy Javascript timer and chronometer library written in CoffeeScript</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/ArnaudRinquin/Chrono.js/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/ArnaudRinquin/Chrono.js/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>Chrono.js</h1>
+
+<p>Javascript is really bad at handling time related tasks:</p>
+
+<ul>
+<li>It's not accurate (try it yourself at <a href="https://gist.github.com/4175664">https://gist.github.com/4175664</a>)</li>
+<li>It's not that easy to control</li>
+<li>Durations have to be calculated</li>
+</ul><p>Chrono.js is a library that focuses on solving these problems:</p>
+
+<ul>
+<li>Handle time with precision</li>
+<li>Do something at regular intervals</li>
+<li>Easily measure durations</li>
+<li>Make countdowns</li>
+<li>Gives exploitable information on ellapsed / remaining time</li>
+</ul><h1>Summary</h1>
+
+<ul>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#timer">Timer</a></li>
+<li><a href="#chrono">Chrono</a></li>
+<li><a href="#new-chrono">new Chrono()</a></li>
+<li><a href="#controls">start(), stop(), reset()</a></li>
+<li><a href="#handlers-binding">handlers binding</a></li>
+<li><a href="#attributes">ticking, settings</a></li>
+<li><a href="#timechanges">time()</a></li>
+<li><a href="#remainingtimechanges">remainingTime()</a></li>
+<li><a href="#building-chronojs">Building Chorno.js</a></li>
+</ul><h1>Usage</h1>
+
+<p>Chrono.js exports 2 classes : <code>Chrono</code> and <code>Timer</code>.</p>
+
+<p>Including Chrono.js into your code is as easy as you could expect it:</p>
+
+<div class="highlight"><pre><span class="nt">&lt;script </span><span class="na">src=</span><span class="s">"chrono.min.js"</span><span class="nt">&gt;&lt;/script&gt;</span>
+</pre></div>
+
+<p>Or with require</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">chronojs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'chrono'</span><span class="p">);</span>
+<span class="kd">var</span> <span class="nx">Chrono</span> <span class="o">=</span> <span class="nx">chronojs</span><span class="p">.</span><span class="nx">Chrono</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">Timer</span> <span class="o">=</span> <span class="nx">chronojs</span><span class="p">.</span><span class="nx">Timer</span><span class="p">;</span>
+</pre></div>
+
+<p>Good to know : Chrono.js does not rely on any other library.</p>
+
+<h1>API</h1>
+
+<h2>Timer</h2>
+
+<p>As said in introduction, setInterval isn't accurate and uneasy to control. Timer class fixes that.</p>
+
+<p>Here is an example:</p>
+
+<div class="highlight"><pre><span class="nx">Timer</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'chrono'</span><span class="p">).</span><span class="nx">Timer</span><span class="p">;</span>
+
+<span class="kd">var</span> <span class="nx">timer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Timer</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span><span class="cm">/* done every 100ms */</span><span class="p">});</span>
+<span class="nx">timer</span><span class="p">.</span><span class="nx">start</span><span class="p">();</span>
+<span class="c1">// ...</span>
+<span class="nx">timer</span><span class="p">.</span><span class="nx">stop</span><span class="p">();</span>
+</pre></div>
+
+<h2>Chrono</h2>
+
+<h3>new Chrono()</h3>
+
+<p>Chrono class will help you to measure passing time and make countdown.
+Importation and creation is easy.</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">Chrono</span>  <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'chrono'</span><span class="p">).</span><span class="nx">Chrono</span>
+
+<span class="kd">var</span> <span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">([</span><span class="nx">settings</span><span class="p">],</span> <span class="p">[</span><span class="o">*</span><span class="nx">handlers</span><span class="p">]);</span>
+</pre></div>
+
+<h4>Settings</h4>
+
+<p>Settings object may have these following attributes:</p>
+
+<p><code>precision</code> : time between ticks. Default is one second</p>
+
+<p><code>startFrom</code> : current time value when Chrono starts (first start or reset)</p>
+
+<p><code>stopTo</code> : Chrono stops when reaching this time</p>
+
+<p>These time related values can be passed in several equivalent ways, here is an example for 1 hour, 2 minutes, 3 seconds and 4 milliseconds</p>
+
+<ul>
+<li>as number in milliseconds
+
+<ul>
+<li>3723004</li>
+</ul>
+</li>
+<li>as string
+
+<ul>
+<li>'1h 2m 3s 4ms'</li>
+<li>'1h2m 3s 4ms' // spaces between units are optionnal</li>
+<li>'2m 4ms 1h 3s' // order is not important</li>
+</ul>
+</li>
+<li>as an object
+
+<ul>
+<li>{h:1, m:2, s:3, ms:4}</li>
+</ul>
+</li>
+</ul><p>Here is a complete example:</p>
+
+<div class="highlight"><pre><span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">({</span>
+  <span class="nx">precision</span><span class="o">:</span><span class="mi">100</span><span class="p">,</span>
+  <span class="nx">startFrom</span><span class="o">:</span> <span class="s2">"1m 30s"</span><span class="p">,</span>
+  <span class="nx">stopTo</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">h</span><span class="o">:</span> <span class="mi">2</span>
+    <span class="nx">m</span><span class="o">:</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="nx">s</span><span class="o">:</span><span class="mi">10</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>For most case, you just need ot pass <code>precision</code>. You can pass it directly as a string or as a number but not as an Object:</p>
+
+<div class="highlight"><pre><span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">(</span><span class="mi">1100</span><span class="p">);</span> <span class="c1">// OK</span>
+<span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">(</span><span class="s1">'1s 100ms'</span><span class="p">);</span> <span class="c1">// OK</span>
+<span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">({</span><span class="nx">s</span><span class="o">:</span><span class="mi">1</span> <span class="nx">ms</span><span class="o">:</span><span class="mi">100</span><span class="p">});</span> <span class="c1">// not OK</span>
+</pre></div>
+
+<h4>Handlers</h4>
+
+<p><code>handlers</code> params are the event callbacks. They will be called with <code>milliseconds</code>, <code>chrono</code> and <code>flag</code> parameters.</p>
+
+<p><code>milliseconds</code> is the amount of milliseconds the Chrono counted by the chrono while ticking. Calling <code>time()</code> will provide you nicer values but we didn't want to make potentially useless computation unless you ask for it.</p>
+
+<p><code>chrono</code> is the source of the calling so you don't have to save the reference.</p>
+
+<p><code>flag</code> is the reason why the handler was called. It can be either <code>tick</code>, <code>start</code>, <code>stop</code> or <code>end</code></p>
+
+<div class="highlight"><pre><span class="nx">c</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">({</span><span class="nx">ms</span><span class="o">:</span><span class="mi">100</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ticks</span><span class="p">,</span> <span class="nx">chrono</span><span class="p">,</span> <span class="nx">flag</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// tick every 100ms</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"ticks "</span> <span class="o">+</span> <span class="nx">ticks</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+
+<h3>Controls</h3>
+
+<p>You can use the 3 self-explained chainable functions:</p>
+
+<ul>
+<li><code>start()</code></li>
+<li><code>stop()</code></li>
+<li><code>reset([settings])</code></li>
+</ul><p>Few details:</p>
+
+<ul>
+<li>
+<code>stop</code> do not reset the number of ticks, it just stops the ticking.</li>
+<li>
+<code>stop</code> is not a toggle, you have to call <code>start</code>
+</li>
+<li>You can change settings when calling settings with the same format as in the constructor. Only difference, you can't directly pass a precision as an object (but it's ok as a string or number).</li>
+<li>
+<code>reset</code> will stop the Chrono so you don't have to do it first, chaining it with <code>start()</code> is easy a nice way to take new settings into account.</li>
+</ul><div class="highlight"><pre><span class="c1">// 100ms Chrono</span>
+<span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">({</span><span class="nx">precision</span><span class="o">:</span><span class="mi">100</span><span class="p">});</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">start</span><span class="p">();</span>
+<span class="c1">// ... restart from 1 minute with a 5 seconds precision</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">reset</span><span class="p">({</span>
+  <span class="nx">startFrom</span><span class="o">:</span><span class="s1">'1m'</span><span class="p">,</span>
+  <span class="nx">precision</span><span class="o">:</span> <span class="s1">'5s'</span>
+<span class="p">}).</span><span class="nx">start</span><span class="p">();</span>
+</pre></div>
+
+<h3>Handlers binding</h3>
+
+<p>You can easily bind / unbind handlers:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">handler</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ticks</span><span class="p">,</span> <span class="nx">chrono</span><span class="p">,</span> <span class="nx">flag</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'flag:'</span> <span class="o">+</span> <span class="nx">flag</span><span class="p">);</span>
+<span class="p">};</span>
+
+<span class="kd">var</span> <span class="nx">anotherOne</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(){</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'tic'</span><span class="p">);</span> 
+<span class="p">};</span>
+
+<span class="kd">var</span> <span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">(</span><span class="s1">'200ms'</span><span class="p">);</span>
+
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="nx">handler</span><span class="p">,</span> <span class="nx">anotherOne</span><span class="p">);</span>
+<span class="c1">// ...</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">unbind</span><span class="p">(</span><span class="nx">anotherOne</span><span class="p">);</span> <span class="c1">// This one would be annoying</span>
+</pre></div>
+
+<h3>Attributes</h3>
+
+<p>You can access these read-only attributes:</p>
+
+<ul>
+<li><code>ticking</code></li>
+<li>
+<code>settings</code>, the default settings merged with the settings you passed</li>
+</ul><div class="highlight"><pre><span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">({</span><span class="nx">precision</span><span class="o">:</span><span class="mi">100</span><span class="p">});</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">ticking</span><span class="p">;</span>
+<span class="o">&gt;</span><span class="kc">false</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">start</span><span class="p">().</span><span class="nx">ticking</span><span class="p">;</span>
+<span class="o">&gt;</span><span class="kc">true</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">stop</span><span class="p">().</span><span class="nx">ticking</span><span class="p">;</span>
+<span class="o">&gt;</span><span class="kc">false</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">start</span><span class="p">().</span><span class="nx">reset</span><span class="p">().</span><span class="nx">ticking</span><span class="p">;</span>
+<span class="o">&gt;</span><span class="kc">false</span>
+</pre></div>
+
+<h3><code>time([changes])</code></h3>
+
+<p><code>time()</code> is a read/write function on ellapsed time.
+It will always return the current ellapsed time as an object with <code>ms</code>, <code>s</code>, <code>m</code>, <code>h</code> attributes which are computed based on ellpased time.</p>
+
+<p>Quick example:</p>
+
+<div class="highlight"><pre>
+<span class="kd">var</span> <span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">({},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">ms</span><span class="p">,</span> <span class="nx">ch</span><span class="p">,</span> <span class="nx">flag</span><span class="p">){</span>
+
+  <span class="k">if</span><span class="p">(</span><span class="nx">ms</span> <span class="o">===</span> <span class="mi">130000</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 2min, 10sec</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">ch</span><span class="p">.</span><span class="nx">time</span><span class="p">());</span> <span class="c1">// outputs {h:0, m:2, s:10, ms:0}</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+
+<p>It can take changes as parameters. For now, it only takes it as a string. Here are a few examples:</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">();</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">time</span><span class="p">(</span><span class="s1">'1s'</span><span class="p">);</span> <span class="c1">// {h:0, m:0, s:1, ms:0}</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">time</span><span class="p">(</span><span class="s1">'+2s'</span><span class="p">);</span> <span class="c1">// {h:0, m:0, s:3, ms:0}</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">time</span><span class="p">(</span><span class="s1">'+3m'</span><span class="p">);</span> <span class="c1">// {h:0, m:3, s:3, ms:0}</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">time</span><span class="p">(</span><span class="s1">'*5m'</span><span class="p">);</span> <span class="c1">// {h:0, m:15, s:3, ms:0}</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">time</span><span class="p">(</span><span class="s1">'-5m 10s'</span><span class="p">);</span> <span class="p">{</span><span class="nx">h</span><span class="o">:</span><span class="mi">0</span><span class="p">,</span> <span class="nx">m</span><span class="o">:</span><span class="mi">10</span><span class="p">,</span> <span class="nx">s</span><span class="o">:</span><span class="mi">10</span><span class="p">,</span> <span class="nx">ms</span><span class="o">:</span><span class="mi">0</span><span class="p">},</span> <span class="nx">handles</span> <span class="nx">several</span> <span class="nx">changes</span> <span class="nx">at</span> <span class="nx">one</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">time</span><span class="p">(</span><span class="s1">'/2m'</span><span class="p">);</span> <span class="p">{</span><span class="nx">h</span><span class="o">:</span><span class="mi">0</span><span class="p">,</span> <span class="nx">m</span><span class="o">:</span><span class="mi">5</span><span class="p">,</span> <span class="nx">s</span><span class="o">:</span><span class="mi">0</span><span class="p">,</span> <span class="nx">ms</span><span class="o">:</span><span class="mi">0</span><span class="p">}</span>
+<span class="nx">chrono</span><span class="p">.</span><span class="nx">time</span><span class="p">(</span><span class="s1">'+5h1500ms'</span><span class="p">);</span> <span class="p">{</span><span class="nx">h</span><span class="o">:</span><span class="mi">5</span><span class="p">,</span> <span class="nx">m</span><span class="o">:</span><span class="mi">10</span><span class="p">,</span> <span class="nx">s</span><span class="o">:</span><span class="mi">11</span><span class="p">,</span> <span class="nx">ms</span><span class="o">:</span><span class="mi">500</span><span class="p">},</span> <span class="nx">spaces</span> <span class="nx">are</span> <span class="nx">optionnal</span>
+</pre></div>
+
+<h3><code>remainingTime([changes])</code></h3>
+
+<p><code>remainingTime()</code> works the very like <code>time()</code> except it's related to the time until <code>stopTo</code> is reached. It will return the same type of time object when called and can take changes into account if needed. Changes will be applied by changing the settings.stopTo value.</p>
+
+<p>It will return <code>undefined</code> if no value has been set to <code>stopTo</code>.</p>
+
+<p>Here is an example :</p>
+
+<div class="highlight"><pre><span class="kd">var</span> <span class="nx">chrono</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Chrono</span><span class="p">({</span>
+  <span class="nx">startFrom</span><span class="o">:</span><span class="s1">'3m10s'</span><span class="p">,</span>
+  <span class="nx">stopTo</span><span class="o">:</span><span class="s1">'5m42s'</span>
+<span class="p">});</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">chrono</span><span class="p">.</span><span class="nx">remainingTime</span><span class="p">();</span>
+<span class="c1">// outputs : {h:0, m:2, s:32, ms:0}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">chrono</span><span class="p">.</span><span class="nx">remaningTime</span><span class="p">(</span><span class="s1">'+2m -12s'</span><span class="p">);</span>
+<span class="c1">// outputs : {h:0, m:4, s:20, ms:0}</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="nx">chrono</span><span class="p">.</span><span class="nx">time</span><span class="p">();</span>
+<span class="c1">// outputs : {h:0, m:3, s:10, ms:0} as current time never changed</span>
+</pre></div>
+
+<h1>Building Chrono.js</h1>
+
+<p>If you want to build Chrono.js from its source, you can just use grunt.
+Several tasks are available:</p>
+
+<ul>
+<li>
+<code>grunt</code> builds Chrono.js and run fast (&lt;1sec) tests</li>
+<li>
+<code>grunt build</code> builds Chrono.js without running any tests (you don't want that)</li>
+<li>
+<code>grunt longtest</code> builds and run long tests (2 minutes and more)</li>
+<li>
+<code>grunt buildDemo</code> builds Chrono.js, runs tests and builds the demo files</li>
+<li>
+<code>grunt watchDemo</code> is buildDemo + watch any file update to re-run and refresh Chrome</li>
+</ul><p>You don't have to run long tests unless you change something because I already run them for you.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Chrono.js maintained by <a href="https://github.com/ArnaudRinquin">ArnaudRinquin</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
